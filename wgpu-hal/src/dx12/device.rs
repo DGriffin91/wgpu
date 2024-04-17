@@ -1014,9 +1014,9 @@ impl crate::Device<super::Api> for super::Device {
             (None, None)
         };
 
-        #[cfg(not(feature = "cursed"))]
+        #[cfg(feature = "not_cursed")]
         log::trace!("{:#?}", parameters);
-        #[cfg(not(feature = "cursed"))]
+        #[cfg(feature = "not_cursed")]
         log::trace!("Bindings {:#?}", binding_map);
 
         let (blob, error) = self
@@ -1595,12 +1595,12 @@ impl crate::Device<super::Api> for super::Device {
             let remaining_wait_duration = match timeout_duration.checked_sub(elapsed) {
                 Some(remaining) => remaining,
                 None => {
-                    #[cfg(not(feature = "cursed"))]
+                    #[cfg(feature = "not_cursed")]
                     log::trace!("Timeout elapsed inbetween waits!");
                     break Ok(false);
                 }
             };
-            #[cfg(not(feature = "cursed"))]
+            #[cfg(feature = "not_cursed")]
             log::trace!(
                 "Waiting for fence value {} for {:?}",
                 value,
@@ -1619,7 +1619,7 @@ impl crate::Device<super::Api> for super::Device {
                     break Err(DeviceError::Lost);
                 }
                 winerror::WAIT_TIMEOUT => {
-                    #[cfg(not(feature = "cursed"))]
+                    #[cfg(feature = "not_cursed")]
                     log::trace!("Wait timed out!");
                     break Ok(false);
                 }
@@ -1630,7 +1630,7 @@ impl crate::Device<super::Api> for super::Device {
             };
 
             fence_value = unsafe { fence.raw.GetCompletedValue() };
-            #[cfg(not(feature = "cursed"))]
+            #[cfg(feature = "not_cursed")]
             log::trace!("Wait complete! Fence actual value: {}", fence_value);
 
             if fence_value >= value {

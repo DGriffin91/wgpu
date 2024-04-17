@@ -34,7 +34,8 @@ targets = [
 
 [features]
 default = ["link"]
-cursed = []
+not_cursed = []
+not_extra_cursed = []
 metal = ["naga/msl-out", "block"]
 vulkan = [
     "naga/spv-out",

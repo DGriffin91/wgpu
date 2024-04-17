@@ -64,29 +64,42 @@ impl<A: HalApi> BufferBindGroupState<A> {
     /// accesses will be in a constant assending order.
     #[allow(clippy::pattern_type_mismatch)]
     pub(crate) fn optimize(&self) {
-        let mut buffers = self.buffers.lock();
-        buffers.sort_unstable_by_key(|(b, _)| b.as_info().id().unzip().0);
+        #[cfg(feature = "not_extra_cursed")]
+        {
+            let mut buffers = self.buffers.lock();
+            buffers.sort_unstable_by_key(|(b, _)| b.as_info().id().unzip().0);
+        }
     }
 
     /// Returns a list of all buffers tracked. May contain duplicates.
     #[allow(clippy::pattern_type_mismatch)]
     pub fn used_ids(&self) -> impl Iterator<Item = BufferId> + '_ {
-        let buffers = self.buffers.lock();
-        buffers
-            .iter()
-            .map(|(ref b, _)| b.as_info().id())
-            .collect::<Vec<_>>()
-            .into_iter()
+        #[cfg(feature = "not_extra_cursed")]
+        {
+            let buffers = self.buffers.lock();
+            buffers
+                .iter()
+                .map(|(ref b, _)| b.as_info().id())
+                .collect::<Vec<_>>()
+                .into_iter()
+        }
+        #[cfg(not(feature = "not_extra_cursed"))]
+        vec![].into_iter()
     }
 
     /// Returns a list of all buffers tracked. May contain duplicates.
     pub fn drain_resources(&self) -> impl Iterator<Item = Arc<Buffer<A>>> + '_ {
-        let mut buffers = self.buffers.lock();
-        buffers
-            .drain(..)
-            .map(|(buffer, _u)| buffer)
-            .collect::<Vec<_>>()
-            .into_iter()
+        #[cfg(feature = "not_extra_cursed")]
+        {
+            let mut buffers = self.buffers.lock();
+            buffers
+                .drain(..)
+                .map(|(buffer, _u)| buffer)
+                .collect::<Vec<_>>()
+                .into_iter()
+        }
+        #[cfg(not(feature = "not_extra_cursed"))]
+        vec![].into_iter()
     }
 
     /// Adds the given resource with the given state.
@@ -98,9 +111,11 @@ impl<A: HalApi> BufferBindGroupState<A> {
     ) -> Option<&'a Arc<Buffer<A>>> {
         let buffer = storage.get(id).ok()?;
 
-        let mut buffers = self.buffers.lock();
-        buffers.push((buffer.clone(), state));
-
+        #[cfg(feature = "not_extra_cursed")] // this is slow but often needed
+        {
+            let mut buffers = self.buffers.lock();
+            buffers.push((buffer.clone(), state));
+        }
         Some(buffer)
     }
 }
@@ -124,7 +139,7 @@ impl<A: HalApi> BufferUsageScope<A> {
 
     fn tracker_assert_in_bounds(&self, index: usize) {
         strict_assert!(index < self.state.len());
-        #[cfg(not(feature = "cursed"))]
+        #[cfg(feature = "not_cursed")]
         self.metadata.tracker_assert_in_bounds(index);
     }
 
@@ -331,11 +346,11 @@ impl<A: HalApi> ResourceTracker<BufferId, Buffer<A>> for BufferTracker<A> {
                 //so it's already been released from user and so it's not inside Registry\Storage
                 if existing_ref_count <= 2 {
                     self.metadata.remove(index);
-                    #[cfg(not(feature = "cursed"))]
+                    #[cfg(feature = "not_cursed")]
                     log::trace!("Buffer {:?} is not tracked anymore", id,);
                     return true;
                 } else {
-                    #[cfg(not(feature = "cursed"))]
+                    #[cfg(feature = "not_cursed")]
                     log::trace!(
                         "Buffer {:?} is still referenced from {}",
                         id,
@@ -364,7 +379,7 @@ impl<A: HalApi> BufferTracker<A> {
     fn tracker_assert_in_bounds(&self, index: usize) {
         strict_assert!(index < self.start.len());
         strict_assert!(index < self.end.len());
-        #[cfg(not(feature = "cursed"))]
+        #[cfg(feature = "not_cursed")]
         self.metadata.tracker_assert_in_bounds(index);
     }
 
@@ -761,7 +776,7 @@ unsafe fn insert<A: HalApi>(
     // check that resource states don't have any conflicts.
     strict_assert_eq!(invalid_resource_state(new_start_state), false);
     strict_assert_eq!(invalid_resource_state(new_end_state), false);
-    #[cfg(not(feature = "cursed"))]
+    #[cfg(feature = "not_cursed")]
     log::trace!("\tbuf {index}: insert {new_start_state:?}..{new_end_state:?}");
 
     unsafe {
@@ -787,7 +802,7 @@ unsafe fn merge<A: HalApi>(
     let new_state = unsafe { state_provider.get_state(index) };
 
     let merged_state = *current_state | new_state;
-    #[cfg(not(feature = "cursed"))]
+    #[cfg(feature = "not_cursed")]
     if invalid_resource_state(merged_state) {
         return Err(UsageConflict::from_buffer(
             BufferId::zip(
@@ -799,7 +814,7 @@ unsafe fn merge<A: HalApi>(
             new_state,
         ));
     }
-    #[cfg(not(feature = "cursed"))]
+    #[cfg(feature = "not_cursed")]
     log::trace!("\tbuf {index32}: merge {current_state:?} + {new_state:?}");
 
     *current_state = merged_state;
@@ -826,7 +841,7 @@ unsafe fn barrier(
         selector: (),
         usage: current_state..new_state,
     });
-    #[cfg(not(feature = "cursed"))]
+    #[cfg(feature = "not_cursed")]
     log::trace!("\tbuf {index}: transition {current_state:?} -> {new_state:?}");
 }
 

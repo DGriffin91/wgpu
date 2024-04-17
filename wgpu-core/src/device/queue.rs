@@ -395,7 +395,7 @@ impl<G: GlobalIdentityHandlerFactory> Global<G> {
         }
 
         if data_size == 0 {
-            #[cfg(not(feature = "cursed"))]
+            #[cfg(feature = "not_cursed")]
             log::trace!("Ignoring write_buffer of size 0");
             return Ok(());
         }
@@ -660,7 +660,7 @@ impl<G: GlobalIdentityHandlerFactory> Global<G> {
         }
 
         if size.width == 0 || size.height == 0 || size.depth_or_array_layers == 0 {
-            #[cfg(not(feature = "cursed"))]
+            #[cfg(feature = "not_cursed")]
             log::trace!("Ignoring write_texture of size 0");
             return Ok(());
         }
@@ -915,7 +915,7 @@ impl<G: GlobalIdentityHandlerFactory> Global<G> {
         let device = queue.device.as_ref().unwrap();
 
         if size.width == 0 || size.height == 0 || size.depth_or_array_layers == 0 {
-            #[cfg(not(feature = "cursed"))]
+            #[cfg(feature = "not_cursed")]
             log::trace!("Ignoring write_texture of size 0");
             return Ok(());
         }
@@ -1184,7 +1184,7 @@ impl<G: GlobalIdentityHandlerFactory> Global<G> {
                         {
                             let cmd_buf_data = cmdbuf.data.lock();
                             let cmd_buf_trackers = &cmd_buf_data.as_ref().unwrap().trackers;
-                            #[cfg(not(feature = "cursed"))]
+                            #[cfg(feature = "not_cursed")]
                             {
                                 // update submission IDs
                                 for buffer in cmd_buf_trackers.buffers.used_resources() {
@@ -1249,7 +1249,7 @@ impl<G: GlobalIdentityHandlerFactory> Global<G> {
                                     };
                                 }
                             }
-                            #[cfg(not(feature = "cursed"))]
+                            #[cfg(feature = "not_cursed")]
                             {
                                 for texture_view in cmd_buf_trackers.views.used_resources() {
                                     texture_view.info.use_at(submit_index);
@@ -1350,7 +1350,7 @@ impl<G: GlobalIdentityHandlerFactory> Global<G> {
                                 ))
                                 .map_err(DeviceError::from)?
                         };
-                        #[cfg(not(feature = "cursed"))]
+                        #[cfg(feature = "not_cursed")]
                         log::trace!("Stitching command buffer {:?} before submission", cmb_id);
 
                         //Note: locking the trackers has to be done after the storages
@@ -1409,7 +1409,7 @@ impl<G: GlobalIdentityHandlerFactory> Global<G> {
                             cmd_buffers: baked.list,
                         });
                     }
-                    #[cfg(not(feature = "cursed"))]
+                    #[cfg(feature = "not_cursed")]
                     log::trace!("Device after submission {}", submit_index);
                 }
             }

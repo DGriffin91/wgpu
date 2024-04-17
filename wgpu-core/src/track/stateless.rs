@@ -33,7 +33,7 @@ impl<Id: TypedId, T: Resource<Id>> StatelessBindGroupSate<Id, T> {
     /// When this list of states is merged into a tracker, the memory
     /// accesses will be in a constant assending order.
     pub(crate) fn optimize(&self) {
-        #[cfg(not(feature = "cursed"))]
+        #[cfg(feature = "not_cursed")]
         {
             let mut resources = self.resources.lock();
             resources.sort_unstable_by_key(|&(id, _)| id.unzip().0);
@@ -42,7 +42,7 @@ impl<Id: TypedId, T: Resource<Id>> StatelessBindGroupSate<Id, T> {
 
     /// Returns a list of all resources tracked. May contain duplicates.
     pub fn used_resources(&self) -> impl Iterator<Item = Arc<T>> + '_ {
-        #[cfg(not(feature = "cursed"))]
+        #[cfg(feature = "not_cursed")]
         {
             let resources = self.resources.lock();
             resources
@@ -51,13 +51,13 @@ impl<Id: TypedId, T: Resource<Id>> StatelessBindGroupSate<Id, T> {
                 .collect::<Vec<_>>()
                 .into_iter()
         }
-        #[cfg(feature = "cursed")]
+        #[cfg(not(feature = "not_cursed"))]
         vec![].into_iter()
     }
 
     /// Returns a list of all resources tracked. May contain duplicates.
     pub fn drain_resources(&self) -> impl Iterator<Item = Arc<T>> + '_ {
-        #[cfg(not(feature = "cursed"))]
+        #[cfg(feature = "not_cursed")]
         {
             let mut resources = self.resources.lock();
             resources
@@ -66,14 +66,14 @@ impl<Id: TypedId, T: Resource<Id>> StatelessBindGroupSate<Id, T> {
                 .collect::<Vec<_>>()
                 .into_iter()
         }
-        #[cfg(feature = "cursed")]
+        #[cfg(not(feature = "not_cursed"))]
         vec![].into_iter()
     }
 
     /// Adds the given resource.
     pub fn add_single<'a>(&self, storage: &'a Storage<T, Id>, id: Id) -> Option<&'a T> {
         let resource = storage.get(id).ok()?;
-        #[cfg(not(feature = "cursed"))]
+        #[cfg(feature = "not_cursed")]
         {
             let mut resources = self.resources.lock();
             resources.push((id, resource.clone()));
@@ -101,7 +101,7 @@ impl<A: HalApi, Id: TypedId, T: Resource<Id>> ResourceTracker<Id, T>
     /// If the ID is higher than the length of internal vectors,
     /// false will be returned.
     fn remove_abandoned(&mut self, id: Id) -> bool {
-        #[cfg(not(feature = "cursed"))]
+        #[cfg(feature = "not_cursed")]
         {
             let index = id.unzip().0 as usize;
 
@@ -120,11 +120,11 @@ impl<A: HalApi, Id: TypedId, T: Resource<Id>> ResourceTracker<Id, T>
                     //so it's already been released from user and so it's not inside Registry\Storage
                     if existing_ref_count <= 2 {
                         self.metadata.remove(index);
-                        #[cfg(not(feature = "cursed"))]
+                        #[cfg(feature = "not_cursed")]
                         log::trace!("{} {:?} is not tracked anymore", T::TYPE, id,);
                         return true;
                     } else {
-                        #[cfg(not(feature = "cursed"))]
+                        #[cfg(feature = "not_cursed")]
                         log::trace!(
                             "{} {:?} is still referenced from {}",
                             T::TYPE,
@@ -149,7 +149,7 @@ impl<A: HalApi, Id: TypedId, T: Resource<Id>> StatelessTracker<A, Id, T> {
     }
 
     fn tracker_assert_in_bounds(&self, index: usize) {
-        #[cfg(not(feature = "cursed"))]
+        #[cfg(feature = "not_cursed")]
         self.metadata.tracker_assert_in_bounds(index);
     }
 
@@ -186,7 +186,7 @@ impl<A: HalApi, Id: TypedId, T: Resource<Id>> StatelessTracker<A, Id, T> {
     /// If the ID is higher than the length of internal vectors,
     /// the vectors will be extended. A call to set_size is not needed.
     pub fn insert_single(&mut self, id: Id, resource: Arc<T>) {
-        #[cfg(not(feature = "cursed"))]
+        #[cfg(feature = "not_cursed")]
         {
             let (index32, _epoch, _) = id.unzip();
             let index = index32 as usize;
@@ -207,7 +207,7 @@ impl<A: HalApi, Id: TypedId, T: Resource<Id>> StatelessTracker<A, Id, T> {
     /// the vectors will be extended. A call to set_size is not needed.
     pub fn add_single<'a>(&mut self, storage: &'a Storage<T, Id>, id: Id) -> Option<&'a Arc<T>> {
         let resource = storage.get(id).ok()?;
-        #[cfg(not(feature = "cursed"))]
+        #[cfg(feature = "not_cursed")]
         {
             let (index32, _epoch, _) = id.unzip();
             let index = index32 as usize;
@@ -228,7 +228,7 @@ impl<A: HalApi, Id: TypedId, T: Resource<Id>> StatelessTracker<A, Id, T> {
     /// If the ID is higher than the length of internal vectors,
     /// the vectors will be extended. A call to set_size is not needed.
     pub fn add_from_tracker(&mut self, other: &Self) {
-        #[cfg(not(feature = "cursed"))]
+        #[cfg(feature = "not_cursed")]
         {
             let incoming_size = other.metadata.size();
             if incoming_size > self.metadata.size() {
@@ -251,7 +251,7 @@ impl<A: HalApi, Id: TypedId, T: Resource<Id>> StatelessTracker<A, Id, T> {
     }
 
     pub fn get(&self, id: Id) -> Option<&Arc<T>> {
-        #[cfg(not(feature = "cursed"))]
+        #[cfg(feature = "not_cursed")]
         {
             let index = id.unzip().0 as usize;
             if index > self.metadata.size() {

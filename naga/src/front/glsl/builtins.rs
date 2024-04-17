@@ -79,7 +79,7 @@ pub fn inject_builtin(
     name: &str,
     mut variations: BuiltinVariations,
 ) {
-    #[cfg(not(feature = "cursed"))]
+    #[cfg(feature = "not_cursed")]
     log::trace!(
         "{} variations: {:?} {:?}",
         name,

@@ -144,7 +144,7 @@ impl<G: GlobalIdentityHandlerFactory> Global<G> {
         }
 
         if offset == end_offset {
-            #[cfg(not(feature = "cursed"))]
+            #[cfg(feature = "not_cursed")]
             log::trace!("Ignoring fill_buffer of size 0");
             return Ok(());
         }

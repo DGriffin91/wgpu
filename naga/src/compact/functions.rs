@@ -75,7 +75,7 @@ impl FunctionMap {
         }
 
         for (_, local) in function.local_variables.iter_mut() {
-            #[cfg(not(feature = "cursed"))]
+            #[cfg(feature = "not_cursed")]
             log::trace!("adjusting local variable {:?}", local.name);
             module_map.types.adjust(&mut local.ty);
             if let Some(ref mut init) = local.init {

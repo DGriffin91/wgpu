@@ -221,14 +221,14 @@ impl super::Adapter {
         let full_ver = Self::parse_full_version(&version).ok();
         let es_ver = full_ver.map_or_else(|| Self::parse_version(&version).ok(), |_| None);
 
-        #[cfg(not(feature = "cursed"))]
+        #[cfg(feature = "not_cursed")]
         if let Some(full_ver) = full_ver {
             let core_profile = (full_ver >= (3, 2)).then(|| unsafe {
                 gl.get_parameter_i32(glow::CONTEXT_PROFILE_MASK)
                     & glow::CONTEXT_CORE_PROFILE_BIT as i32
                     != 0
             });
-            #[cfg(not(feature = "cursed"))]
+            #[cfg(feature = "not_cursed")]
             log::trace!(
                 "Profile: {}",
                 core_profile

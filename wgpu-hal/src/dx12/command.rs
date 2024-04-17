@@ -220,7 +220,7 @@ impl super::CommandEncoder {
     }
 
     fn reset_signature(&mut self, layout: &super::PipelineLayoutShared) {
-        #[cfg(not(feature = "cursed"))]
+        #[cfg(feature = "not_cursed")]
         log::trace!("Reset signature {:?}", layout.signature);
         if let Some(root_index) = layout.special_constants_root_index {
             self.pass.root_elements[root_index as usize] =
@@ -314,13 +314,13 @@ impl crate::CommandEncoder<super::Api> for super::CommandEncoder {
         T: Iterator<Item = crate::BufferBarrier<'a, super::Api>>,
     {
         self.temp.barriers.clear();
-        #[cfg(not(feature = "cursed"))]
+        #[cfg(feature = "not_cursed")]
         log::trace!(
             "List {:p} buffer transitions",
             self.list.as_ref().unwrap().as_ptr()
         );
         for barrier in barriers {
-            #[cfg(not(feature = "cursed"))]
+            #[cfg(feature = "not_cursed")]
             log::trace!(
                 "\t{:p}: usage {:?}..{:?}",
                 barrier.buffer.resource.as_ptr(),
@@ -374,13 +374,13 @@ impl crate::CommandEncoder<super::Api> for super::CommandEncoder {
         T: Iterator<Item = crate::TextureBarrier<'a, super::Api>>,
     {
         self.temp.barriers.clear();
-        #[cfg(not(feature = "cursed"))]
+        #[cfg(feature = "not_cursed")]
         log::trace!(
             "List {:p} texture transitions",
             self.list.as_ref().unwrap().as_ptr()
         );
         for barrier in barriers {
-            #[cfg(not(feature = "cursed"))]
+            #[cfg(feature = "not_cursed")]
             log::trace!(
                 "\t{:p}: usage {:?}..{:?}, range {:?}",
                 barrier.texture.resource.as_ptr(),
@@ -881,14 +881,14 @@ impl crate::CommandEncoder<super::Api> for super::CommandEncoder {
         group: &super::BindGroup,
         dynamic_offsets: &[wgt::DynamicOffset],
     ) {
-        #[cfg(not(feature = "cursed"))]
+        #[cfg(feature = "not_cursed")]
         log::trace!("Set group[{}]", index);
         let info = &layout.bind_group_infos[index as usize];
         let mut root_index = info.base_root_index as usize;
 
         // Bind CBV/SRC/UAV descriptor tables
         if info.tables.contains(super::TableTypes::SRV_CBV_UAV) {
-            #[cfg(not(feature = "cursed"))]
+            #[cfg(feature = "not_cursed")]
             log::trace!("\tBind element[{}] = view", root_index);
             self.pass.root_elements[root_index] =
                 super::RootElement::Table(group.handle_views.unwrap().gpu);
@@ -897,7 +897,7 @@ impl crate::CommandEncoder<super::Api> for super::CommandEncoder {
 
         // Bind Sampler descriptor tables.
         if info.tables.contains(super::TableTypes::SAMPLERS) {
-            #[cfg(not(feature = "cursed"))]
+            #[cfg(feature = "not_cursed")]
             log::trace!("\tBind element[{}] = sampler", root_index);
             self.pass.root_elements[root_index] =
                 super::RootElement::Table(group.handle_samplers.unwrap().gpu);
@@ -911,7 +911,7 @@ impl crate::CommandEncoder<super::Api> for super::CommandEncoder {
             .zip(group.dynamic_buffers.iter())
             .zip(dynamic_offsets)
         {
-            #[cfg(not(feature = "cursed"))]
+            #[cfg(feature = "not_cursed")]
             log::trace!("\tBind element[{}] = dynamic", root_index);
             self.pass.root_elements[root_index] = super::RootElement::DynamicOffsetBuffer {
                 kind,

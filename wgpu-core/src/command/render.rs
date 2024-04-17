@@ -431,7 +431,7 @@ struct State<A: HalApi> {
 
 impl<A: HalApi> State<A> {
     fn is_ready(&self, indexed: bool) -> Result<(), DrawError> {
-        #[cfg(not(feature = "cursed"))]
+        #[cfg(feature = "not_cursed")]
         {
             // Determine how many vertex buffers have already been bound
             let vertex_buffer_count =
@@ -2364,7 +2364,7 @@ impl<G: GlobalIdentityHandlerFactory> Global<G> {
                     }
                 }
             }
-            #[cfg(not(feature = "cursed"))]
+            #[cfg(feature = "not_cursed")]
             log::trace!("Merging renderpass into cmd_buf {:?}", encoder_id);
             let (trackers, pending_discard_init_fixups) =
                 info.finish(raw).map_pass_err(pass_scope)?;

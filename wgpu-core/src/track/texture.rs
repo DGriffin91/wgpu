@@ -245,7 +245,7 @@ impl<A: HalApi> TextureUsageScope<A> {
     }
 
     fn tracker_assert_in_bounds(&self, index: usize) {
-        #[cfg(not(feature = "cursed"))]
+        #[cfg(feature = "not_cursed")]
         {
             self.metadata.tracker_assert_in_bounds(index);
 
@@ -423,11 +423,11 @@ impl<A: HalApi> ResourceTracker<TextureId, Texture<A>> for TextureTracker<A> {
                     self.start_set.complex.remove(&index);
                     self.end_set.complex.remove(&index);
                     self.metadata.remove(index);
-                    #[cfg(not(feature = "cursed"))]
+                    #[cfg(feature = "not_cursed")]
                     log::trace!("Texture {:?} is not tracked anymore", id,);
                     return true;
                 } else {
-                    #[cfg(not(feature = "cursed"))]
+                    #[cfg(feature = "not_cursed")]
                     log::trace!(
                         "Texture {:?} is still referenced from {}",
                         id,
@@ -456,7 +456,7 @@ impl<A: HalApi> TextureTracker<A> {
     }
 
     fn tracker_assert_in_bounds(&self, index: usize) {
-        #[cfg(not(feature = "cursed"))]
+        #[cfg(feature = "not_cursed")]
         {
             self.metadata.tracker_assert_in_bounds(index);
 
@@ -994,7 +994,7 @@ unsafe fn insert<A: HalApi>(
             // check that resource states don't have any conflicts.
             strict_assert_eq!(invalid_resource_state(state), false);
 
-            #[cfg(not(feature = "cursed"))]
+            #[cfg(feature = "not_cursed")]
             log::trace!("\ttex {index}: insert start {state:?}");
 
             if let Some(start_state) = start_state {
@@ -1011,7 +1011,7 @@ unsafe fn insert<A: HalApi>(
 
             let complex =
                 unsafe { ComplexTextureState::from_selector_state_iter(full_range, state_iter) };
-            #[cfg(not(feature = "cursed"))]
+            #[cfg(feature = "not_cursed")]
             log::trace!("\ttex {index}: insert start {complex:?}");
 
             if let Some(start_state) = start_state {
@@ -1033,7 +1033,7 @@ unsafe fn insert<A: HalApi>(
                 // This should only ever happen with a wgpu bug, but let's just double
                 // check that resource states don't have any conflicts.
                 strict_assert_eq!(invalid_resource_state(state), false);
-                #[cfg(not(feature = "cursed"))]
+                #[cfg(feature = "not_cursed")]
                 log::trace!("\ttex {index}: insert end {state:?}");
 
                 // We only need to insert into the end, as there is guarenteed to be
@@ -1046,7 +1046,7 @@ unsafe fn insert<A: HalApi>(
                 let complex = unsafe {
                     ComplexTextureState::from_selector_state_iter(full_range, state_iter)
                 };
-                #[cfg(not(feature = "cursed"))]
+                #[cfg(feature = "not_cursed")]
                 log::trace!("\ttex {index}: insert end {complex:?}");
 
                 // We only need to insert into the end, as there is guarenteed to be
@@ -1085,7 +1085,7 @@ unsafe fn merge<A: HalApi>(
     match (current_state, new_state) {
         (SingleOrManyStates::Single(current_simple), SingleOrManyStates::Single(new_simple)) => {
             let merged_state = *current_simple | new_simple;
-            #[cfg(not(feature = "cursed"))]
+            #[cfg(feature = "not_cursed")]
             {
                 log::trace!("\ttex {index}: merge simple {current_simple:?} + {new_simple:?}");
                 if invalid_resource_state(merged_state) {
@@ -1117,7 +1117,7 @@ unsafe fn merge<A: HalApi>(
 
             for (selector, new_state) in new_many {
                 let merged_state = *current_simple | new_state;
-                #[cfg(not(feature = "cursed"))]
+                #[cfg(feature = "not_cursed")]
                 {
                     log::trace!(
                         "\ttex {index}: merge {selector:?} {current_simple:?} + {new_state:?}"
@@ -1162,7 +1162,7 @@ unsafe fn merge<A: HalApi>(
                     // Once we remove unknown, this will never be empty, as
                     // simple states are never unknown.
                     let merged_state = merged_state - TextureUses::UNKNOWN;
-                    #[cfg(not(feature = "cursed"))]
+                    #[cfg(feature = "not_cursed")]
                     {
                         log::trace!(
                             "\ttex {index}: merge mip {mip_id} layers {layers:?} \
@@ -1208,7 +1208,7 @@ unsafe fn merge<A: HalApi>(
                             // We know nothing about this state, lets just move on.
                             continue;
                         }
-                        #[cfg(not(feature = "cursed"))]
+                        #[cfg(feature = "not_cursed")]
                         {
                             log::trace!(
                                 "\ttex {index}: merge mip {mip_id} layers {layers:?} \
@@ -1266,7 +1266,7 @@ unsafe fn barrier(
             if skip_barrier(current_simple, new_simple) {
                 return;
             }
-            #[cfg(not(feature = "cursed"))]
+            #[cfg(feature = "not_cursed")]
             log::trace!("\ttex {index}: transition simple {current_simple:?} -> {new_simple:?}");
 
             barriers.push(PendingTransition {
@@ -1285,7 +1285,7 @@ unsafe fn barrier(
                     continue;
                 }
 
-                #[cfg(not(feature = "cursed"))]
+                #[cfg(feature = "not_cursed")]
                 log::trace!(
                     "\ttex {index}: transition {selector:?} {current_simple:?} -> {new_state:?}"
                 );
@@ -1310,7 +1310,7 @@ unsafe fn barrier(
                         continue;
                     }
 
-                    #[cfg(not(feature = "cursed"))]
+                    #[cfg(feature = "not_cursed")]
                     log::trace!(
                         "\ttex {index}: transition mip {mip_id} layers {layers:?} \
                          {current_layer_state:?} -> {new_simple:?}"
@@ -1344,7 +1344,7 @@ unsafe fn barrier(
                         if skip_barrier(*current_layer_state, new_state) {
                             continue;
                         }
-                        #[cfg(not(feature = "cursed"))]
+                        #[cfg(feature = "not_cursed")]
                         log::trace!(
                             "\ttex {index}: transition mip {mip_id} layers {layers:?} \
                             {current_layer_state:?} -> {new_state:?}"

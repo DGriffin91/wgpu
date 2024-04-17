@@ -350,7 +350,7 @@ impl<'a> ConstantEvaluator<'a> {
         expr: &Expression,
         span: Span,
     ) -> Result<Handle<Expression>, ConstantEvaluatorError> {
-        #[cfg(not(feature = "cursed"))]
+        #[cfg(feature = "not_cursed")]
         log::trace!("try_eval_and_append: {:?}", expr);
         match *expr {
             Expression::Constant(c) if self.function_local_data.is_none() => {

@@ -98,7 +98,7 @@ impl Instance {
                     }
                 }
             } else {
-                #[cfg(not(feature = "cursed"))]
+                #[cfg(feature = "not_cursed")]
                 log::trace!("Instance::new: backend {:?} not requested", A::VARIANT);
                 None
             }

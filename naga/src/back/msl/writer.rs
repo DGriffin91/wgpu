@@ -1384,7 +1384,7 @@ impl<W: Write> Writer<W> {
         }
 
         let expression = &context.function.expressions[expr_handle];
-        #[cfg(not(feature = "cursed"))]
+        #[cfg(feature = "not_cursed")]
         log::trace!("expression {:?} = {:?}", expr_handle, expression);
         match *expression {
             crate::Expression::Literal(_)
@@ -2638,7 +2638,7 @@ impl<W: Write> Writer<W> {
             .insert(&level as *const _ as *const ());
 
         for statement in statements {
-            #[cfg(not(feature = "cursed"))]
+            #[cfg(feature = "not_cursed")]
             log::trace!("statement[{}] {:?}", level.0, statement);
             match *statement {
                 crate::Statement::Emit(ref range) => {
@@ -3544,7 +3544,7 @@ impl<W: Write> Writer<W> {
     ) -> Result<TranslationInfo, Error> {
         let mut pass_through_globals = Vec::new();
         for (fun_handle, fun) in module.functions.iter() {
-            #[cfg(not(feature = "cursed"))]
+            #[cfg(feature = "not_cursed")]
             log::trace!(
                 "function {:?}, handle {:?}",
                 fun.name.as_deref().unwrap_or("(anonymous)"),
@@ -3688,7 +3688,7 @@ impl<W: Write> Writer<W> {
             let fun_info = mod_info.get_entry_point(ep_index);
             let mut ep_error = None;
 
-            #[cfg(not(feature = "cursed"))]
+            #[cfg(feature = "not_cursed")]
             log::trace!(
                 "entry point {:?}, index {:?}",
                 fun.name.as_deref().unwrap_or("(anonymous)"),

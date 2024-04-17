@@ -692,7 +692,7 @@ impl<I: Iterator<Item = u32>> Frontend<I> {
     ) -> Result<(), Error> {
         let raw = self.next()?;
         let dec_typed = spirv::Decoration::from_u32(raw).ok_or(Error::InvalidDecoration(raw))?;
-        #[cfg(not(feature = "cursed"))]
+        #[cfg(feature = "not_cursed")]
         log::trace!("\t\t{}: {:?}", dec.debug_name(), dec_typed);
         match dec_typed {
             spirv::Decoration::BuiltIn => {
@@ -1489,7 +1489,7 @@ impl<I: Iterator<Item = u32>> Frontend<I> {
                     let result_type_id = self.next()?;
                     let result_id = self.next()?;
                     let base_id = self.next()?;
-                    #[cfg(not(feature = "cursed"))]
+                    #[cfg(feature = "not_cursed")]
                     log::trace!("\t\t\tlooking up expr {:?}", base_id);
 
                     let mut acex = {
@@ -1525,7 +1525,7 @@ impl<I: Iterator<Item = u32>> Frontend<I> {
 
                     for _ in 4..inst.wc {
                         let access_id = self.next()?;
-                        #[cfg(not(feature = "cursed"))]
+                        #[cfg(feature = "not_cursed")]
                         log::trace!("\t\t\tlooking up index expr {:?}", access_id);
                         let index_expr = self.lookup_expression.lookup(access_id)?.clone();
                         let index_expr_handle = get_expr_handle!(access_id, &index_expr);
@@ -1542,7 +1542,7 @@ impl<I: Iterator<Item = u32>> Frontend<I> {
                             ),
                             _ => None,
                         };
-                        #[cfg(not(feature = "cursed"))]
+                        #[cfg(feature = "not_cursed")]
                         log::trace!("\t\t\tlooking up type {:?}", acex.type_id);
                         let type_lookup = self.lookup_type.lookup(acex.type_id)?;
                         let ty = &ctx.type_arena[type_lookup.handle];
@@ -1871,13 +1871,13 @@ impl<I: Iterator<Item = u32>> Frontend<I> {
                     let result_type_id = self.next()?;
                     let result_id = self.next()?;
                     let base_id = self.next()?;
-                    #[cfg(not(feature = "cursed"))]
+                    #[cfg(feature = "not_cursed")]
                     log::trace!("\t\t\tlooking up expr {:?}", base_id);
                     let mut lexp = self.lookup_expression.lookup(base_id)?.clone();
                     lexp.handle = get_expr_handle!(base_id, &lexp);
                     for _ in 4..inst.wc {
                         let index = self.next()?;
-                        #[cfg(not(feature = "cursed"))]
+                        #[cfg(feature = "not_cursed")]
                         log::trace!("\t\t\tlooking up type {:?}", lexp.type_id);
                         let type_lookup = self.lookup_type.lookup(lexp.type_id)?;
                         let type_id = match ctx.type_arena[type_lookup.handle].inner {
@@ -1962,7 +1962,7 @@ impl<I: Iterator<Item = u32>> Frontend<I> {
                     let mut components = Vec::with_capacity(inst.wc as usize - 2);
                     for _ in 3..inst.wc {
                         let comp_id = self.next()?;
-                        #[cfg(not(feature = "cursed"))]
+                        #[cfg(feature = "not_cursed")]
                         log::trace!("\t\t\tlooking up expr {:?}", comp_id);
                         let lexp = self.lookup_expression.lookup(comp_id)?;
                         let handle = get_expr_handle!(comp_id, lexp);

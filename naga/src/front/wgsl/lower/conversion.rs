@@ -405,7 +405,7 @@ impl crate::TypeInner {
             (Sk::AbstractInt, Sk::Sint | Sk::Uint | Sk::AbstractFloat | Sk::Float) => {}
             _ => return None,
         }
-        #[cfg(not(feature = "cursed"))]
+        #[cfg(feature = "not_cursed")]
         log::trace!("      okay: expr {expr_scalar:?}, goal {goal_scalar:?}");
         Some((expr_scalar, goal_scalar))
     }

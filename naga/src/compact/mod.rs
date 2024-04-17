@@ -32,11 +32,11 @@ pub fn compact(module: &mut crate::Module) {
     let mut module_tracer = ModuleTracer::new(module);
 
     // We treat all globals as used by definition.
-    #[cfg(not(feature = "cursed"))]
+    #[cfg(feature = "not_cursed")]
     log::trace!("tracing global variables");
     {
         for (_, global) in module.global_variables.iter() {
-            #[cfg(not(feature = "cursed"))]
+            #[cfg(feature = "not_cursed")]
             log::trace!("tracing global {:?}", global.name);
             module_tracer.types_used.insert(global.ty);
             if let Some(init) = global.init {
@@ -62,13 +62,13 @@ pub fn compact(module: &mut crate::Module) {
     // expressions each function uses, and produce maps for each
     // function from pre-compaction to post-compaction expression
     // handles.
-    #[cfg(not(feature = "cursed"))]
+    #[cfg(feature = "not_cursed")]
     log::trace!("tracing functions");
     let function_maps: Vec<FunctionMap> = module
         .functions
         .iter()
         .map(|(_, f)| {
-            #[cfg(not(feature = "cursed"))]
+            #[cfg(feature = "not_cursed")]
             log::trace!("tracing function {:?}", f.name);
             let mut function_tracer = module_tracer.as_function(f);
             function_tracer.trace();
@@ -77,13 +77,13 @@ pub fn compact(module: &mut crate::Module) {
         .collect();
 
     // Similiarly, observe what each entry point actually uses.
-    #[cfg(not(feature = "cursed"))]
+    #[cfg(feature = "not_cursed")]
     log::trace!("tracing entry points");
     let entry_point_maps: Vec<FunctionMap> = module
         .entry_points
         .iter()
         .map(|e| {
-            #[cfg(not(feature = "cursed"))]
+            #[cfg(feature = "not_cursed")]
             log::trace!("tracing entry point {:?}", e.function.name);
             let mut used = module_tracer.as_function(&e.function);
             used.trace();
@@ -108,7 +108,7 @@ pub fn compact(module: &mut crate::Module) {
 
     // Treat all named types as used.
     for (handle, ty) in module.types.iter() {
-        #[cfg(not(feature = "cursed"))]
+        #[cfg(feature = "not_cursed")]
         log::trace!("tracing type {:?}, name {:?}", handle, ty.name);
         if ty.name.is_some() {
             module_tracer.types_used.insert(handle);
@@ -129,7 +129,7 @@ pub fn compact(module: &mut crate::Module) {
     // `FastIndexSet`s don't have an underlying Vec<T> that we can
     // steal, compact in place, and then rebuild the `FastIndexSet`
     // from. So we have to rebuild the type arena from scratch.
-    #[cfg(not(feature = "cursed"))]
+    #[cfg(feature = "not_cursed")]
     log::trace!("compacting types");
     let mut new_types = arena::UniqueArena::new();
     for (old_handle, mut ty, span) in module.types.drain_all() {
@@ -140,12 +140,12 @@ pub fn compact(module: &mut crate::Module) {
         }
     }
     module.types = new_types;
-    #[cfg(not(feature = "cursed"))]
+    #[cfg(feature = "not_cursed")]
     log::trace!("adjusting special types");
     module_map.adjust_special_types(&mut module.special_types);
 
     // Drop unused constant expressions, reusing existing storage.
-    #[cfg(not(feature = "cursed"))]
+    #[cfg(feature = "not_cursed")]
     log::trace!("adjusting constant expressions");
     module.const_expressions.retain_mut(|handle, expr| {
         if module_map.const_expressions.used(handle) {
@@ -157,7 +157,7 @@ pub fn compact(module: &mut crate::Module) {
     });
 
     // Drop unused constants in place, reusing existing storage.
-    #[cfg(not(feature = "cursed"))]
+    #[cfg(feature = "not_cursed")]
     log::trace!("adjusting constants");
     module.constants.retain_mut(|handle, constant| {
         if module_map.constants.used(handle) {
@@ -170,7 +170,7 @@ pub fn compact(module: &mut crate::Module) {
     });
 
     // Adjust global variables' types and initializers.
-    #[cfg(not(feature = "cursed"))]
+    #[cfg(feature = "not_cursed")]
     log::trace!("adjusting global variables");
     for (_, global) in module.global_variables.iter_mut() {
         /* log::trace!("adjusting global {:?}", global.name); */
@@ -186,14 +186,14 @@ pub fn compact(module: &mut crate::Module) {
 
     // Compact each function.
     for ((_, function), map) in module.functions.iter_mut().zip(function_maps.iter()) {
-        #[cfg(not(feature = "cursed"))]
+        #[cfg(feature = "not_cursed")]
         log::trace!("compacting function {:?}", function.name);
         map.compact(function, &module_map, &mut reused_named_expressions);
     }
 
     // Compact each entry point.
     for (entry, map) in module.entry_points.iter_mut().zip(entry_point_maps.iter()) {
-        #[cfg(not(feature = "cursed"))]
+        #[cfg(feature = "not_cursed")]
         log::trace!("compacting entry point {:?}", entry.function.name);
         map.compact(
             &mut entry.function,

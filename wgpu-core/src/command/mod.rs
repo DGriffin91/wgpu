@@ -273,7 +273,7 @@ impl<A: HalApi> CommandBuffer<A> {
     }
 
     pub(crate) fn extract_baked_commands(&mut self) -> BakedCommands<A> {
-        #[cfg(not(feature = "cursed"))]
+        #[cfg(feature = "not_cursed")]
         log::trace!(
             "Extracting BakedCommands from CommandBuffer {:?}",
             self.info.label()
@@ -376,6 +376,10 @@ impl<C: Clone> BasePass<C> {
     fn new(label: &Label) -> Self {
         Self {
             label: label.as_ref().map(|cow| cow.to_string()),
+            #[cfg(not(feature = "not_cursed"))] 
+            // If there's a bunch of draw calls, a decent amount of time is spent reallocating commands
+            commands: Vec::with_capacity(100000),
+            #[cfg(feature = "not_cursed")]
             commands: Vec::new(),
             dynamic_offsets: Vec::new(),
             string_data: Vec::new(),
@@ -438,7 +442,7 @@ impl<G: GlobalIdentityHandlerFactory> Global<G> {
                             cmd_buf_data.status = CommandEncoderStatus::Finished;
                             //Note: if we want to stop tracking the swapchain texture view,
                             // this is the place to do it.
-                            #[cfg(not(feature = "cursed"))]
+                            #[cfg(feature = "not_cursed")]
                             log::trace!("Command buffer {:?}", encoder_id);
                             None
                         }

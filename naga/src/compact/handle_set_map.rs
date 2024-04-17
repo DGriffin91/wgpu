@@ -108,7 +108,7 @@ impl<T: 'static> HandleMap<T> {
     /// If we thought `old` wouldn't be used in the compacted module, return
     /// `None`.
     pub fn try_adjust(&self, old: Handle<T>) -> Option<Handle<T>> {
-        #[cfg(not(feature = "cursed"))]
+        #[cfg(feature = "not_cursed")]
         log::trace!(
             "adjusting {} handle [{}] -> [{:?}]",
             std::any::type_name::<T>(),

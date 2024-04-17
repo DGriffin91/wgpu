@@ -1913,7 +1913,7 @@ impl<A: HalApi> Device<A> {
 
         check_texture_usage(texture.desc.usage, pub_usage)?;
 
-        #[cfg(not(feature = "cursed"))]
+        #[cfg(feature = "not_cursed")]
         used_texture_ranges.push(TextureInitTrackerAction {
             texture: texture.clone(),
             range: TextureInitRange {

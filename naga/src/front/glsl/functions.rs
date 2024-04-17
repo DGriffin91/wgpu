@@ -552,7 +552,7 @@ impl Frontend {
             if args.len() != overload.parameters.len() {
                 continue;
             }
-            #[cfg(not(feature = "cursed"))]
+            #[cfg(feature = "not_cursed")]
             log::trace!("Testing overload {}", overload_idx);
 
             // Stores whether the current overload matches exactly the function call
@@ -584,7 +584,7 @@ impl Frontend {
                 let overload_param_ty = &ctx.module.types[*overload_parameter].inner;
                 let call_arg_ty = ctx.get_type(call_argument.0);
 
-                #[cfg(not(feature = "cursed"))]
+                #[cfg(feature = "not_cursed")]
                 log::trace!(
                     "Testing parameter {}\n\tOverload = {:?}\n\tCall = {:?}",
                     i,

@@ -21,7 +21,8 @@ all-features = true
 
 [features]
 default = []
-cursed = []
+not_cursed = []
+not_extra_cursed = []
 clone = []
 dot-out = []
 glsl-in = ["pp-rs"]

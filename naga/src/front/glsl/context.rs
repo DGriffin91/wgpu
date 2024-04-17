@@ -1338,7 +1338,7 @@ impl<'a> Context<'a> {
             }
         };
 
-        #[cfg(not(feature = "cursed"))]
+        #[cfg(feature = "not_cursed")]
         log::trace!(
             "Lowered {:?}\n\tKind = {:?}\n\tPos = {:?}\n\tResult = {:?}",
             expr,

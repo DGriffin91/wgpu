@@ -64,7 +64,7 @@ impl<A: HalApi> CommandBufferTextureMemoryActions<A> {
     ) -> SurfacesInDiscardState<A> {
         let mut immediately_necessary_clears = SurfacesInDiscardState::new();
 
-        #[cfg(not(feature = "cursed"))]
+        #[cfg(feature = "not_cursed")]
         {
             // Note that within a command buffer we may stack arbitrary memory init
             // actions on the same texture Since we react to them in sequence, they
