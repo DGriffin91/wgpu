@@ -64,42 +64,29 @@ impl<A: HalApi> BufferBindGroupState<A> {
     /// accesses will be in a constant assending order.
     #[allow(clippy::pattern_type_mismatch)]
     pub(crate) fn optimize(&self) {
-        #[cfg(feature = "not_extra_cursed")]
-        {
-            let mut buffers = self.buffers.lock();
-            buffers.sort_unstable_by_key(|(b, _)| b.as_info().id().unzip().0);
-        }
+        let mut buffers = self.buffers.lock();
+        buffers.sort_unstable_by_key(|(b, _)| b.as_info().id().unzip().0);
     }
 
     /// Returns a list of all buffers tracked. May contain duplicates.
     #[allow(clippy::pattern_type_mismatch)]
     pub fn used_ids(&self) -> impl Iterator<Item = BufferId> + '_ {
-        #[cfg(feature = "not_extra_cursed")]
-        {
-            let buffers = self.buffers.lock();
-            buffers
-                .iter()
-                .map(|(ref b, _)| b.as_info().id())
-                .collect::<Vec<_>>()
-                .into_iter()
-        }
-        #[cfg(not(feature = "not_extra_cursed"))]
-        vec![].into_iter()
+        let buffers = self.buffers.lock();
+        buffers
+            .iter()
+            .map(|(ref b, _)| b.as_info().id())
+            .collect::<Vec<_>>()
+            .into_iter()
     }
 
     /// Returns a list of all buffers tracked. May contain duplicates.
     pub fn drain_resources(&self) -> impl Iterator<Item = Arc<Buffer<A>>> + '_ {
-        #[cfg(feature = "not_extra_cursed")]
-        {
-            let mut buffers = self.buffers.lock();
-            buffers
-                .drain(..)
-                .map(|(buffer, _u)| buffer)
-                .collect::<Vec<_>>()
-                .into_iter()
-        }
-        #[cfg(not(feature = "not_extra_cursed"))]
-        vec![].into_iter()
+        let mut buffers = self.buffers.lock();
+        buffers
+            .drain(..)
+            .map(|(buffer, _u)| buffer)
+            .collect::<Vec<_>>()
+            .into_iter()
     }
 
     /// Adds the given resource with the given state.
@@ -111,11 +98,9 @@ impl<A: HalApi> BufferBindGroupState<A> {
     ) -> Option<&'a Arc<Buffer<A>>> {
         let buffer = storage.get(id).ok()?;
 
-        #[cfg(feature = "not_extra_cursed")] // this is slow but often needed
-        {
-            let mut buffers = self.buffers.lock();
-            buffers.push((buffer.clone(), state));
-        }
+        let mut buffers = self.buffers.lock();
+        buffers.push((buffer.clone(), state));
+
         Some(buffer)
     }
 }

@@ -356,81 +356,78 @@ pub(crate) fn validate_texture_copy_range(
     texture_side: CopySide,
     copy_size: &Extent3d,
 ) -> Result<(hal::CopyExtent, u32), TransferError> {
-    //#[cfg(feature = "not_cursed")]
-    {
-        let (block_width, block_height) = desc.format.block_dimensions();
+    let (block_width, block_height) = desc.format.block_dimensions();
 
-        let extent_virtual = desc.mip_level_size(texture_copy_view.mip_level).ok_or(
-            TransferError::InvalidTextureMipLevel {
-                level: texture_copy_view.mip_level,
-                total: desc.mip_level_count,
-            },
-        )?;
-        // physical size can be larger than the virtual
-        let extent = extent_virtual.physical_size(desc.format);
+    let extent_virtual = desc.mip_level_size(texture_copy_view.mip_level).ok_or(
+        TransferError::InvalidTextureMipLevel {
+            level: texture_copy_view.mip_level,
+            total: desc.mip_level_count,
+        },
+    )?;
+    // physical size can be larger than the virtual
+    let extent = extent_virtual.physical_size(desc.format);
 
-        if desc.format.is_depth_stencil_format() && *copy_size != extent {
-            return Err(TransferError::InvalidDepthTextureExtent);
-        }
+    if desc.format.is_depth_stencil_format() && *copy_size != extent {
+        return Err(TransferError::InvalidDepthTextureExtent);
+    }
 
-        /// Return `Ok` if a run `size` texels long starting at `start_offset` falls
-        /// entirely within `texture_size`. Otherwise, return an appropriate a`Err`.
-        fn check_dimension(
-            dimension: TextureErrorDimension,
-            side: CopySide,
-            start_offset: u32,
-            size: u32,
-            texture_size: u32,
-        ) -> Result<(), TransferError> {
-            // Avoid underflow in the subtraction by checking start_offset against
-            // texture_size first.
-            if start_offset <= texture_size && size <= texture_size - start_offset {
-                Ok(())
-            } else {
-                Err(TransferError::TextureOverrun {
-                    start_offset,
-                    end_offset: start_offset.wrapping_add(size),
-                    texture_size,
-                    dimension,
-                    side,
-                })
-            }
+    /// Return `Ok` if a run `size` texels long starting at `start_offset` falls
+    /// entirely within `texture_size`. Otherwise, return an appropriate a`Err`.
+    fn check_dimension(
+        dimension: TextureErrorDimension,
+        side: CopySide,
+        start_offset: u32,
+        size: u32,
+        texture_size: u32,
+    ) -> Result<(), TransferError> {
+        // Avoid underflow in the subtraction by checking start_offset against
+        // texture_size first.
+        if start_offset <= texture_size && size <= texture_size - start_offset {
+            Ok(())
+        } else {
+            Err(TransferError::TextureOverrun {
+                start_offset,
+                end_offset: start_offset.wrapping_add(size),
+                texture_size,
+                dimension,
+                side,
+            })
         }
+    }
 
-        check_dimension(
-            TextureErrorDimension::X,
-            texture_side,
-            texture_copy_view.origin.x,
-            copy_size.width,
-            extent.width,
-        )?;
-        check_dimension(
-            TextureErrorDimension::Y,
-            texture_side,
-            texture_copy_view.origin.y,
-            copy_size.height,
-            extent.height,
-        )?;
-        check_dimension(
-            TextureErrorDimension::Z,
-            texture_side,
-            texture_copy_view.origin.z,
-            copy_size.depth_or_array_layers,
-            extent.depth_or_array_layers,
-        )?;
+    check_dimension(
+        TextureErrorDimension::X,
+        texture_side,
+        texture_copy_view.origin.x,
+        copy_size.width,
+        extent.width,
+    )?;
+    check_dimension(
+        TextureErrorDimension::Y,
+        texture_side,
+        texture_copy_view.origin.y,
+        copy_size.height,
+        extent.height,
+    )?;
+    check_dimension(
+        TextureErrorDimension::Z,
+        texture_side,
+        texture_copy_view.origin.z,
+        copy_size.depth_or_array_layers,
+        extent.depth_or_array_layers,
+    )?;
 
-        if texture_copy_view.origin.x % block_width != 0 {
-            return Err(TransferError::UnalignedCopyOriginX);
-        }
-        if texture_copy_view.origin.y % block_height != 0 {
-            return Err(TransferError::UnalignedCopyOriginY);
-        }
-        if copy_size.width % block_width != 0 {
-            return Err(TransferError::UnalignedCopyWidth);
-        }
-        if copy_size.height % block_height != 0 {
-            return Err(TransferError::UnalignedCopyHeight);
-        }
+    if texture_copy_view.origin.x % block_width != 0 {
+        return Err(TransferError::UnalignedCopyOriginX);
+    }
+    if texture_copy_view.origin.y % block_height != 0 {
+        return Err(TransferError::UnalignedCopyOriginY);
+    }
+    if copy_size.width % block_width != 0 {
+        return Err(TransferError::UnalignedCopyWidth);
+    }
+    if copy_size.height % block_height != 0 {
+        return Err(TransferError::UnalignedCopyHeight);
     }
 
     let (depth, array_layer_count) = match desc.dimension {
