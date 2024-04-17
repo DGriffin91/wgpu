@@ -49,13 +49,13 @@ impl<A: HalApi, I: TypedId, T: Resource<I>> ResourceMetadata<A, I, T> {
     /// In release mode this function is completely empty and is removed.
     #[cfg_attr(not(feature = "strict_asserts"), allow(unused_variables))]
     pub(super) fn tracker_assert_in_bounds(&self, index: usize) {
-        //strict_assert!(index < self.owned.len());
-        //strict_assert!(index < self.resources.len());
-        //strict_assert!(if self.contains(index) {
-        //    self.resources[index].is_some()
-        //} else {
-        //    true
-        //});
+        strict_assert!(index < self.owned.len());
+        strict_assert!(index < self.resources.len());
+        strict_assert!(if self.contains(index) {
+            self.resources[index].is_some()
+        } else {
+            true
+        });
     }
 
     /// Returns true if the tracker owns no resources.

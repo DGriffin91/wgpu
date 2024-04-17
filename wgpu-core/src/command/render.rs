@@ -431,49 +431,52 @@ struct State<A: HalApi> {
 
 impl<A: HalApi> State<A> {
     fn is_ready(&self, indexed: bool) -> Result<(), DrawError> {
-        /*
-                // Determine how many vertex buffers have already been bound
-                let vertex_buffer_count = self.vertex.inputs.iter().take_while(|v| v.bound).count() as u32;
-                // Compare with the needed quantity
-                if vertex_buffer_count < self.vertex.buffers_required {
-                    return Err(DrawError::MissingVertexBuffer {
-                        index: vertex_buffer_count,
-                    });
-                }
+        #[cfg(not(feature = "cursed"))]
+        {
+            // Determine how many vertex buffers have already been bound
+            let vertex_buffer_count =
+                self.vertex.inputs.iter().take_while(|v| v.bound).count() as u32;
+            // Compare with the needed quantity
+            if vertex_buffer_count < self.vertex.buffers_required {
+                return Err(DrawError::MissingVertexBuffer {
+                    index: vertex_buffer_count,
+                });
+            }
 
-                let bind_mask = self.binder.invalid_mask();
-                if bind_mask != 0 {
-                    //let (expected, provided) = self.binder.entries[index as usize].info();
-                    return Err(DrawError::IncompatibleBindGroup {
-                        index: bind_mask.trailing_zeros(),
-                        diff: self.binder.bgl_diff(),
-                    });
-                }
-                if self.pipeline.is_none() {
-                    return Err(DrawError::MissingPipeline);
-                }
-                if self.blend_constant == OptionalState::Required {
-                    return Err(DrawError::MissingBlendConstant);
-                }
+            let bind_mask = self.binder.invalid_mask();
+            if bind_mask != 0 {
+                //let (expected, provided) = self.binder.entries[index as usize].info();
+                return Err(DrawError::IncompatibleBindGroup {
+                    index: bind_mask.trailing_zeros(),
+                    diff: self.binder.bgl_diff(),
+                });
+            }
+            if self.pipeline.is_none() {
+                return Err(DrawError::MissingPipeline);
+            }
+            if self.blend_constant == OptionalState::Required {
+                return Err(DrawError::MissingBlendConstant);
+            }
 
-                if indexed {
-                    // Pipeline expects an index buffer
-                    if let Some(pipeline_index_format) = self.index.pipeline_format {
-                        // We have a buffer bound
-                        let buffer_index_format = self.index.format.ok_or(DrawError::MissingIndexBuffer)?;
+            if indexed {
+                // Pipeline expects an index buffer
+                if let Some(pipeline_index_format) = self.index.pipeline_format {
+                    // We have a buffer bound
+                    let buffer_index_format =
+                        self.index.format.ok_or(DrawError::MissingIndexBuffer)?;
 
-                        // The buffers are different formats
-                        if pipeline_index_format != buffer_index_format {
-                            return Err(DrawError::UnmatchedIndexFormats {
-                                pipeline: pipeline_index_format,
-                                buffer: buffer_index_format,
-                            });
-                        }
+                    // The buffers are different formats
+                    if pipeline_index_format != buffer_index_format {
+                        return Err(DrawError::UnmatchedIndexFormats {
+                            pipeline: pipeline_index_format,
+                            buffer: buffer_index_format,
+                        });
                     }
                 }
+            }
 
-                self.binder.check_late_buffer_bindings()?;
-        */
+            self.binder.check_late_buffer_bindings()?;
+        }
         Ok(())
     }
 
@@ -1449,7 +1452,6 @@ impl<G: GlobalIdentityHandlerFactory> Global<G> {
                             .add_single(&*bind_group_guard, bind_group_id)
                             .ok_or(RenderCommandError::InvalidBindGroup(bind_group_id))
                             .map_pass_err(scope)?;
-
                         if bind_group.device.as_info().id() != device.as_info().id() {
                             return Err(DeviceError::WrongDevice).map_pass_err(scope);
                         }
@@ -2362,8 +2364,8 @@ impl<G: GlobalIdentityHandlerFactory> Global<G> {
                     }
                 }
             }
-
-            /* log::trace!("Merging renderpass into cmd_buf {:?}", encoder_id); */
+            #[cfg(not(feature = "cursed"))]
+            log::trace!("Merging renderpass into cmd_buf {:?}", encoder_id);
             let (trackers, pending_discard_init_fixups) =
                 info.finish(raw).map_pass_err(pass_scope)?;
 

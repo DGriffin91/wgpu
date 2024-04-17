@@ -1913,17 +1913,18 @@ impl<A: HalApi> Device<A> {
 
         check_texture_usage(texture.desc.usage, pub_usage)?;
 
-        //used_texture_ranges.push(TextureInitTrackerAction {
-        //    texture: texture.clone(),
-        //    range: TextureInitRange {
-        //        mip_range: view.desc.range.mip_range(texture.desc.mip_level_count),
-        //        layer_range: view
-        //            .desc
-        //            .range
-        //            .layer_range(texture.desc.array_layer_count()),
-        //    },
-        //    kind: MemoryInitKind::NeedsInitializedMemory,
-        //});
+        #[cfg(not(feature = "cursed"))]
+        used_texture_ranges.push(TextureInitTrackerAction {
+            texture: texture.clone(),
+            range: TextureInitRange {
+                mip_range: view.desc.range.mip_range(texture.desc.mip_level_count),
+                layer_range: view
+                    .desc
+                    .range
+                    .layer_range(texture.desc.array_layer_count()),
+            },
+            kind: MemoryInitKind::NeedsInitializedMemory,
+        });
 
         Ok(())
     }

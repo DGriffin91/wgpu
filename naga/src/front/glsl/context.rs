@@ -1338,13 +1338,14 @@ impl<'a> Context<'a> {
             }
         };
 
-        /* log::trace!(
+        #[cfg(not(feature = "cursed"))]
+        log::trace!(
             "Lowered {:?}\n\tKind = {:?}\n\tPos = {:?}\n\tResult = {:?}",
             expr,
             kind,
             pos,
             handle
-        ); */
+        );
 
         Ok((Some(handle), meta))
     }

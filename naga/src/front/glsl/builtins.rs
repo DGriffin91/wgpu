@@ -79,12 +79,13 @@ pub fn inject_builtin(
     name: &str,
     mut variations: BuiltinVariations,
 ) {
-    /* log::trace!(
+    #[cfg(not(feature = "cursed"))]
+    log::trace!(
         "{} variations: {:?} {:?}",
         name,
         variations,
         declaration.variations
-    ); */
+    );
     // Don't regeneate variations
     variations.remove(declaration.variations);
     declaration.variations |= variations;

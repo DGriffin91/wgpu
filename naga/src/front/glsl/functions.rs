@@ -552,8 +552,8 @@ impl Frontend {
             if args.len() != overload.parameters.len() {
                 continue;
             }
-
-            /* log::trace!("Testing overload {}", overload_idx); */
+            #[cfg(not(feature = "cursed"))]
+            log::trace!("Testing overload {}", overload_idx);
 
             // Stores whether the current overload matches exactly the function call
             let mut exact = true;
@@ -584,12 +584,13 @@ impl Frontend {
                 let overload_param_ty = &ctx.module.types[*overload_parameter].inner;
                 let call_arg_ty = ctx.get_type(call_argument.0);
 
-                /* log::trace!(
+                #[cfg(not(feature = "cursed"))]
+                log::trace!(
                     "Testing parameter {}\n\tOverload = {:?}\n\tCall = {:?}",
                     i,
                     overload_param_ty,
                     call_arg_ty
-                ); */
+                );
 
                 // Storage images cannot be directly compared since while the access is part of the
                 // type in naga's IR, in glsl they are a qualifier and don't enter in the match as

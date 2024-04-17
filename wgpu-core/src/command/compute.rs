@@ -339,7 +339,8 @@ impl<A: HalApi> State<A> {
                 .set_and_remove_from_usage_scope_sparse(&mut self.scope.buffers, indirect_buffer);
         }
 
-        /* log::trace!("Encoding dispatch barriers"); */
+        #[cfg(not(feature = "cursed"))]
+        log::trace!("Encoding dispatch barriers");
 
         CommandBuffer::drain_barriers(raw_encoder, base_trackers, snatch_guard);
         Ok(())

@@ -162,13 +162,15 @@ where
     }
 
     pub(crate) fn insert(&mut self, id: I, value: Arc<T>) {
-        /* log::trace!("User is inserting {}{:?}", T::TYPE, id); */
+        #[cfg(not(feature = "cursed"))]
+        log::trace!("User is inserting {}{:?}", T::TYPE, id);
         let (index, epoch, _backend) = id.unzip();
         self.insert_impl(index as usize, epoch, Element::Occupied(value, epoch))
     }
 
     pub(crate) fn insert_error(&mut self, id: I, label: &str) {
-        /* log::trace!("User is insering as error {}{:?}", T::TYPE, id); */
+        #[cfg(not(feature = "cursed"))]
+        log::trace!("User is insering as error {}{:?}", T::TYPE, id);
         let (index, epoch, _) = id.unzip();
         self.insert_impl(
             index as usize,
@@ -193,13 +195,15 @@ where
     }
 
     pub(crate) fn force_replace(&mut self, id: I, value: T) {
-        /* log::trace!("User is replacing {}{:?}", T::TYPE, id); */
+        #[cfg(not(feature = "cursed"))]
+        log::trace!("User is replacing {}{:?}", T::TYPE, id);
         let (index, epoch, _) = id.unzip();
         self.map[index as usize] = Element::Occupied(Arc::new(value), epoch);
     }
 
     pub(crate) fn remove(&mut self, id: I) -> Option<Arc<T>> {
-        /* log::trace!("User is removing {}{:?}", T::TYPE, id); */
+        #[cfg(not(feature = "cursed"))]
+        log::trace!("User is removing {}{:?}", T::TYPE, id);
         let (index, epoch, _) = id.unzip();
         match std::mem::replace(&mut self.map[index as usize], Element::Vacant) {
             Element::Occupied(value, storage_epoch) => {

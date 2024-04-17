@@ -64,57 +64,57 @@ impl<A: HalApi> CommandBufferTextureMemoryActions<A> {
     ) -> SurfacesInDiscardState<A> {
         let mut immediately_necessary_clears = SurfacesInDiscardState::new();
 
-        /*
+        #[cfg(not(feature = "cursed"))]
+        {
+            // Note that within a command buffer we may stack arbitrary memory init
+            // actions on the same texture Since we react to them in sequence, they
+            // are going to be dropped again at queue submit
+            //
+            // We don't need to add MemoryInitKind::NeedsInitializedMemory to
+            // init_actions if a surface is part of the discard list. But that would
+            // mean splitting up the action which is more than we'd win here.
+            self.init_actions.extend(
+                action
+                    .texture
+                    .initialization_status
+                    .read()
+                    .check_action(action),
+            );
 
-        // Note that within a command buffer we may stack arbitrary memory init
-        // actions on the same texture Since we react to them in sequence, they
-        // are going to be dropped again at queue submit
-        //
-        // We don't need to add MemoryInitKind::NeedsInitializedMemory to
-        // init_actions if a surface is part of the discard list. But that would
-        // mean splitting up the action which is more than we'd win here.
-        self.init_actions.extend(
-            action
-                .texture
-                .initialization_status
-                .read()
-                .check_action(action),
-        );
+            // We expect very few discarded surfaces at any point in time which is
+            // why a simple linear search is likely best. (i.e. most of the time
+            // self.discards is empty!)
+            let init_actions = &mut self.init_actions;
+            self.discards.retain(|discarded_surface| {
+                if discarded_surface.texture.as_info().id() == action.texture.as_info().id()
+                    && action.range.layer_range.contains(&discarded_surface.layer)
+                    && action
+                        .range
+                        .mip_range
+                        .contains(&discarded_surface.mip_level)
+                {
+                    if let MemoryInitKind::NeedsInitializedMemory = action.kind {
+                        immediately_necessary_clears.push(discarded_surface.clone());
 
-        // We expect very few discarded surfaces at any point in time which is
-        // why a simple linear search is likely best. (i.e. most of the time
-        // self.discards is empty!)
-        let init_actions = &mut self.init_actions;
-        self.discards.retain(|discarded_surface| {
-            if discarded_surface.texture.as_info().id() == action.texture.as_info().id()
-                && action.range.layer_range.contains(&discarded_surface.layer)
-                && action
-                    .range
-                    .mip_range
-                    .contains(&discarded_surface.mip_level)
-            {
-                if let MemoryInitKind::NeedsInitializedMemory = action.kind {
-                    immediately_necessary_clears.push(discarded_surface.clone());
-
-                    // Mark surface as implicitly initialized (this is relevant
-                    // because it might have been uninitialized prior to
-                    // discarding
-                    init_actions.push(TextureInitTrackerAction {
-                        texture: discarded_surface.texture.clone(),
-                        range: TextureInitRange {
-                            mip_range: discarded_surface.mip_level
-                                ..(discarded_surface.mip_level + 1),
-                            layer_range: discarded_surface.layer..(discarded_surface.layer + 1),
-                        },
-                        kind: MemoryInitKind::ImplicitlyInitialized,
-                    });
+                        // Mark surface as implicitly initialized (this is relevant
+                        // because it might have been uninitialized prior to
+                        // discarding
+                        init_actions.push(TextureInitTrackerAction {
+                            texture: discarded_surface.texture.clone(),
+                            range: TextureInitRange {
+                                mip_range: discarded_surface.mip_level
+                                    ..(discarded_surface.mip_level + 1),
+                                layer_range: discarded_surface.layer..(discarded_surface.layer + 1),
+                            },
+                            kind: MemoryInitKind::ImplicitlyInitialized,
+                        });
+                    }
+                    false
+                } else {
+                    true
                 }
-                false
-            } else {
-                true
-            }
-        });
-        */
+            });
+        }
         immediately_necessary_clears
     }
 

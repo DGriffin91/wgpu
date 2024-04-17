@@ -21,6 +21,7 @@ all-features = true
 
 [features]
 default = []
+cursed = []
 clone = []
 dot-out = []
 glsl-in = ["pp-rs"]

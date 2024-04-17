@@ -395,7 +395,8 @@ impl<G: GlobalIdentityHandlerFactory> Global<G> {
         }
 
         if data_size == 0 {
-            /* log::trace!("Ignoring write_buffer of size 0"); */
+            #[cfg(not(feature = "cursed"))]
+            log::trace!("Ignoring write_buffer of size 0");
             return Ok(());
         }
 
@@ -659,7 +660,8 @@ impl<G: GlobalIdentityHandlerFactory> Global<G> {
         }
 
         if size.width == 0 || size.height == 0 || size.depth_or_array_layers == 0 {
-            /* log::trace!("Ignoring write_texture of size 0"); */
+            #[cfg(not(feature = "cursed"))]
+            log::trace!("Ignoring write_texture of size 0");
             return Ok(());
         }
 
@@ -913,7 +915,8 @@ impl<G: GlobalIdentityHandlerFactory> Global<G> {
         let device = queue.device.as_ref().unwrap();
 
         if size.width == 0 || size.height == 0 || size.depth_or_array_layers == 0 {
-            /* log::trace!("Ignoring write_texture of size 0"); */
+            #[cfg(not(feature = "cursed"))]
+            log::trace!("Ignoring write_texture of size 0");
             return Ok(());
         }
 
@@ -1181,37 +1184,41 @@ impl<G: GlobalIdentityHandlerFactory> Global<G> {
                         {
                             let cmd_buf_data = cmdbuf.data.lock();
                             let cmd_buf_trackers = &cmd_buf_data.as_ref().unwrap().trackers;
-                            /*
-                            // update submission IDs
-                            for buffer in cmd_buf_trackers.buffers.used_resources() {
-                                let id = buffer.info.id();
-                                let raw_buf = match buffer.raw.get(&snatch_guard) {
-                                    Some(raw) => raw,
-                                    None => {
-                                        return Err(QueueSubmitError::DestroyedBuffer(id));
-                                    }
-                                };
-                                buffer.info.use_at(submit_index);
-                                if buffer.is_unique() {
-                                    if let BufferMapState::Active { .. } = *buffer.map_state.lock()
-                                    {
-                                        log::warn!("Dropped buffer has a pending mapping.");
-                                        unsafe { device.raw().unmap_buffer(raw_buf) }
-                                            .map_err(DeviceError::from)?;
-                                    }
-                                    temp_suspected
-                                        .as_mut()
-                                        .unwrap()
-                                        .buffers
-                                        .insert(id, buffer.clone());
-                                } else {
-                                    match *buffer.map_state.lock() {
-                                        BufferMapState::Idle => (),
-                                        _ => return Err(QueueSubmitError::BufferStillMapped(id)),
+                            #[cfg(not(feature = "cursed"))]
+                            {
+                                // update submission IDs
+                                for buffer in cmd_buf_trackers.buffers.used_resources() {
+                                    let id = buffer.info.id();
+                                    let raw_buf = match buffer.raw.get(&snatch_guard) {
+                                        Some(raw) => raw,
+                                        None => {
+                                            return Err(QueueSubmitError::DestroyedBuffer(id));
+                                        }
+                                    };
+                                    buffer.info.use_at(submit_index);
+                                    if buffer.is_unique() {
+                                        if let BufferMapState::Active { .. } =
+                                            *buffer.map_state.lock()
+                                        {
+                                            log::warn!("Dropped buffer has a pending mapping.");
+                                            unsafe { device.raw().unmap_buffer(raw_buf) }
+                                                .map_err(DeviceError::from)?;
+                                        }
+                                        temp_suspected
+                                            .as_mut()
+                                            .unwrap()
+                                            .buffers
+                                            .insert(id, buffer.clone());
+                                    } else {
+                                        match *buffer.map_state.lock() {
+                                            BufferMapState::Idle => (),
+                                            _ => {
+                                                return Err(QueueSubmitError::BufferStillMapped(id))
+                                            }
+                                        }
                                     }
                                 }
                             }
-                            */
                             // Leaving this out results in this error in bevy: (but bunnymark works fine without it)
                             // ERROR present_frames: wgpu_core::present: No work has been submitted for this frame
                             for texture in cmd_buf_trackers.textures.used_resources() {
@@ -1242,93 +1249,94 @@ impl<G: GlobalIdentityHandlerFactory> Global<G> {
                                     };
                                 }
                             }
-                            /*
-                            for texture_view in cmd_buf_trackers.views.used_resources() {
-                                texture_view.info.use_at(submit_index);
-                                if texture_view.is_unique() {
-                                    temp_suspected
-                                        .as_mut()
-                                        .unwrap()
-                                        .texture_views
-                                        .insert(texture_view.as_info().id(), texture_view.clone());
-                                }
-                            }
+                            #[cfg(not(feature = "cursed"))]
                             {
-                                for bg in cmd_buf_trackers.bind_groups.used_resources() {
-                                    bg.info.use_at(submit_index);
-                                    // We need to update the submission indices for the contained
-                                    // state-less (!) resources as well, so that they don't get
-                                    // deleted too early if the parent bind group goes out of scope.
-                                    for view in bg.used.views.used_resources() {
-                                        view.info.use_at(submit_index);
+                                for texture_view in cmd_buf_trackers.views.used_resources() {
+                                    texture_view.info.use_at(submit_index);
+                                    if texture_view.is_unique() {
+                                        temp_suspected.as_mut().unwrap().texture_views.insert(
+                                            texture_view.as_info().id(),
+                                            texture_view.clone(),
+                                        );
                                     }
-                                    for sampler in bg.used.samplers.used_resources() {
-                                        sampler.info.use_at(submit_index);
+                                }
+                                {
+                                    for bg in cmd_buf_trackers.bind_groups.used_resources() {
+                                        bg.info.use_at(submit_index);
+                                        // We need to update the submission indices for the contained
+                                        // state-less (!) resources as well, so that they don't get
+                                        // deleted too early if the parent bind group goes out of scope.
+                                        for view in bg.used.views.used_resources() {
+                                            view.info.use_at(submit_index);
+                                        }
+                                        for sampler in bg.used.samplers.used_resources() {
+                                            sampler.info.use_at(submit_index);
+                                        }
+                                        if bg.is_unique() {
+                                            temp_suspected
+                                                .as_mut()
+                                                .unwrap()
+                                                .bind_groups
+                                                .insert(bg.as_info().id(), bg.clone());
+                                        }
                                     }
-                                    if bg.is_unique() {
+                                }
+                                // assert!(cmd_buf_trackers.samplers.is_empty());
+                                for compute_pipeline in
+                                    cmd_buf_trackers.compute_pipelines.used_resources()
+                                {
+                                    compute_pipeline.info.use_at(submit_index);
+                                    if compute_pipeline.is_unique() {
+                                        temp_suspected.as_mut().unwrap().compute_pipelines.insert(
+                                            compute_pipeline.as_info().id(),
+                                            compute_pipeline.clone(),
+                                        );
+                                    }
+                                }
+                                for render_pipeline in
+                                    cmd_buf_trackers.render_pipelines.used_resources()
+                                {
+                                    render_pipeline.info.use_at(submit_index);
+                                    if render_pipeline.is_unique() {
+                                        temp_suspected.as_mut().unwrap().render_pipelines.insert(
+                                            render_pipeline.as_info().id(),
+                                            render_pipeline.clone(),
+                                        );
+                                    }
+                                }
+                                for query_set in cmd_buf_trackers.query_sets.used_resources() {
+                                    query_set.info.use_at(submit_index);
+                                    if query_set.is_unique() {
                                         temp_suspected
                                             .as_mut()
                                             .unwrap()
-                                            .bind_groups
-                                            .insert(bg.as_info().id(), bg.clone());
+                                            .query_sets
+                                            .insert(query_set.as_info().id(), query_set.clone());
+                                    }
+                                }
+                                for bundle in cmd_buf_trackers.bundles.used_resources() {
+                                    bundle.info.use_at(submit_index);
+                                    // We need to update the submission indices for the contained
+                                    // state-less (!) resources as well, excluding the bind groups.
+                                    // They don't get deleted too early if the bundle goes out of scope.
+                                    for render_pipeline in
+                                        bundle.used.render_pipelines.read().used_resources()
+                                    {
+                                        render_pipeline.info.use_at(submit_index);
+                                    }
+                                    for query_set in bundle.used.query_sets.read().used_resources()
+                                    {
+                                        query_set.info.use_at(submit_index);
+                                    }
+                                    if bundle.is_unique() {
+                                        temp_suspected
+                                            .as_mut()
+                                            .unwrap()
+                                            .render_bundles
+                                            .insert(bundle.as_info().id(), bundle.clone());
                                     }
                                 }
                             }
-                            // assert!(cmd_buf_trackers.samplers.is_empty());
-                            for compute_pipeline in
-                                cmd_buf_trackers.compute_pipelines.used_resources()
-                            {
-                                compute_pipeline.info.use_at(submit_index);
-                                if compute_pipeline.is_unique() {
-                                    temp_suspected.as_mut().unwrap().compute_pipelines.insert(
-                                        compute_pipeline.as_info().id(),
-                                        compute_pipeline.clone(),
-                                    );
-                                }
-                            }
-                            for render_pipeline in
-                                cmd_buf_trackers.render_pipelines.used_resources()
-                            {
-                                render_pipeline.info.use_at(submit_index);
-                                if render_pipeline.is_unique() {
-                                    temp_suspected.as_mut().unwrap().render_pipelines.insert(
-                                        render_pipeline.as_info().id(),
-                                        render_pipeline.clone(),
-                                    );
-                                }
-                            }
-                            for query_set in cmd_buf_trackers.query_sets.used_resources() {
-                                query_set.info.use_at(submit_index);
-                                if query_set.is_unique() {
-                                    temp_suspected
-                                        .as_mut()
-                                        .unwrap()
-                                        .query_sets
-                                        .insert(query_set.as_info().id(), query_set.clone());
-                                }
-                            }
-                            for bundle in cmd_buf_trackers.bundles.used_resources() {
-                                bundle.info.use_at(submit_index);
-                                // We need to update the submission indices for the contained
-                                // state-less (!) resources as well, excluding the bind groups.
-                                // They don't get deleted too early if the bundle goes out of scope.
-                                for render_pipeline in
-                                    bundle.used.render_pipelines.read().used_resources()
-                                {
-                                    render_pipeline.info.use_at(submit_index);
-                                }
-                                for query_set in bundle.used.query_sets.read().used_resources() {
-                                    query_set.info.use_at(submit_index);
-                                }
-                                if bundle.is_unique() {
-                                    temp_suspected
-                                        .as_mut()
-                                        .unwrap()
-                                        .render_bundles
-                                        .insert(bundle.as_info().id(), bundle.clone());
-                                }
-                            }
-                            */
                         }
 
                         let mut baked = cmdbuf.from_arc_into_baked();
@@ -1342,7 +1350,8 @@ impl<G: GlobalIdentityHandlerFactory> Global<G> {
                                 ))
                                 .map_err(DeviceError::from)?
                         };
-                        /* log::trace!("Stitching command buffer {:?} before submission", cmb_id); */
+                        #[cfg(not(feature = "cursed"))]
+                        log::trace!("Stitching command buffer {:?} before submission", cmb_id);
 
                         //Note: locking the trackers has to be done after the storages
                         let mut trackers = device.trackers.lock();
@@ -1400,8 +1409,8 @@ impl<G: GlobalIdentityHandlerFactory> Global<G> {
                             cmd_buffers: baked.list,
                         });
                     }
-
-                    /* log::trace!("Device after submission {}", submit_index); */
+                    #[cfg(not(feature = "cursed"))]
+                    log::trace!("Device after submission {}", submit_index);
                 }
             }
 

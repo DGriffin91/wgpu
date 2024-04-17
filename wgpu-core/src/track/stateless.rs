@@ -33,38 +33,51 @@ impl<Id: TypedId, T: Resource<Id>> StatelessBindGroupSate<Id, T> {
     /// When this list of states is merged into a tracker, the memory
     /// accesses will be in a constant assending order.
     pub(crate) fn optimize(&self) {
-        //let mut resources = self.resources.lock();
-        //resources.sort_unstable_by_key(|&(id, _)| id.unzip().0);
+        #[cfg(not(feature = "cursed"))]
+        {
+            let mut resources = self.resources.lock();
+            resources.sort_unstable_by_key(|&(id, _)| id.unzip().0);
+        }
     }
 
     /// Returns a list of all resources tracked. May contain duplicates.
     pub fn used_resources(&self) -> impl Iterator<Item = Arc<T>> + '_ {
-        //let resources = self.resources.lock();
-        //resources
-        //    .iter()
-        //    .map(|(_, resource)| resource.clone())
-        //    .collect::<Vec<_>>()
-        //    .into_iter()
+        #[cfg(not(feature = "cursed"))]
+        {
+            let resources = self.resources.lock();
+            resources
+                .iter()
+                .map(|(_, resource)| resource.clone())
+                .collect::<Vec<_>>()
+                .into_iter()
+        }
+        #[cfg(feature = "cursed")]
         vec![].into_iter()
     }
 
     /// Returns a list of all resources tracked. May contain duplicates.
     pub fn drain_resources(&self) -> impl Iterator<Item = Arc<T>> + '_ {
-        //let mut resources = self.resources.lock();
-        //resources
-        //    .drain(..)
-        //    .map(|(_, r)| r)
-        //    .collect::<Vec<_>>()
-        //    .into_iter()
+        #[cfg(not(feature = "cursed"))]
+        {
+            let mut resources = self.resources.lock();
+            resources
+                .drain(..)
+                .map(|(_, r)| r)
+                .collect::<Vec<_>>()
+                .into_iter()
+        }
+        #[cfg(feature = "cursed")]
         vec![].into_iter()
     }
 
     /// Adds the given resource.
     pub fn add_single<'a>(&self, storage: &'a Storage<T, Id>, id: Id) -> Option<&'a T> {
         let resource = storage.get(id).ok()?;
-
-        //let mut resources = self.resources.lock();
-        //resources.push((id, resource.clone()));
+        #[cfg(not(feature = "cursed"))]
+        {
+            let mut resources = self.resources.lock();
+            resources.push((id, resource.clone()));
+        }
 
         Some(resource)
     }
@@ -88,36 +101,41 @@ impl<A: HalApi, Id: TypedId, T: Resource<Id>> ResourceTracker<Id, T>
     /// If the ID is higher than the length of internal vectors,
     /// false will be returned.
     fn remove_abandoned(&mut self, id: Id) -> bool {
-        //let index = id.unzip().0 as usize;
-        //
-        //if index >= self.metadata.size() {
-        //    return false;
-        //}
-        //
-        //resource_log!("StatelessTracker::remove_abandoned {id:?}");
-        //
-        //self.tracker_assert_in_bounds(index);
-        //
-        //unsafe {
-        //    if self.metadata.contains_unchecked(index) {
-        //        let existing_ref_count = self.metadata.get_ref_count_unchecked(index);
-        //        //RefCount 2 means that resource is hold just by DeviceTracker and this suspected resource itself
-        //        //so it's already been released from user and so it's not inside Registry\Storage
-        //        if existing_ref_count <= 2 {
-        //            self.metadata.remove(index);
-        //            /* log::trace!("{} {:?} is not tracked anymore", T::TYPE, id,); */
-        //            return true;
-        //        } else {
-        //            /* log::trace!(
-        //                "{} {:?} is still referenced from {}",
-        //                T::TYPE,
-        //                id,
-        //                existing_ref_count
-        //            ); */
-        //            return false;
-        //        }
-        //    }
-        //}
+        #[cfg(not(feature = "cursed"))]
+        {
+            let index = id.unzip().0 as usize;
+
+            if index >= self.metadata.size() {
+                return false;
+            }
+
+            resource_log!("StatelessTracker::remove_abandoned {id:?}");
+
+            self.tracker_assert_in_bounds(index);
+
+            unsafe {
+                if self.metadata.contains_unchecked(index) {
+                    let existing_ref_count = self.metadata.get_ref_count_unchecked(index);
+                    //RefCount 2 means that resource is hold just by DeviceTracker and this suspected resource itself
+                    //so it's already been released from user and so it's not inside Registry\Storage
+                    if existing_ref_count <= 2 {
+                        self.metadata.remove(index);
+                        #[cfg(not(feature = "cursed"))]
+                        log::trace!("{} {:?} is not tracked anymore", T::TYPE, id,);
+                        return true;
+                    } else {
+                        #[cfg(not(feature = "cursed"))]
+                        log::trace!(
+                            "{} {:?} is still referenced from {}",
+                            T::TYPE,
+                            id,
+                            existing_ref_count
+                        );
+                        return false;
+                    }
+                }
+            }
+        }
         true
     }
 }
@@ -131,7 +149,8 @@ impl<A: HalApi, Id: TypedId, T: Resource<Id>> StatelessTracker<A, Id, T> {
     }
 
     fn tracker_assert_in_bounds(&self, index: usize) {
-        //self.metadata.tracker_assert_in_bounds(index);
+        #[cfg(not(feature = "cursed"))]
+        self.metadata.tracker_assert_in_bounds(index);
     }
 
     /// Sets the size of all the vectors inside the tracker.
@@ -167,16 +186,19 @@ impl<A: HalApi, Id: TypedId, T: Resource<Id>> StatelessTracker<A, Id, T> {
     /// If the ID is higher than the length of internal vectors,
     /// the vectors will be extended. A call to set_size is not needed.
     pub fn insert_single(&mut self, id: Id, resource: Arc<T>) {
-        //let (index32, _epoch, _) = id.unzip();
-        //let index = index32 as usize;
-        //
-        //self.allow_index(index);
-        //
-        //self.tracker_assert_in_bounds(index);
-        //
-        //unsafe {
-        //    self.metadata.insert(index, resource);
-        //}
+        #[cfg(not(feature = "cursed"))]
+        {
+            let (index32, _epoch, _) = id.unzip();
+            let index = index32 as usize;
+
+            self.allow_index(index);
+
+            self.tracker_assert_in_bounds(index);
+
+            unsafe {
+                self.metadata.insert(index, resource);
+            }
+        }
     }
 
     /// Adds the given resource to the tracker.
@@ -185,18 +207,19 @@ impl<A: HalApi, Id: TypedId, T: Resource<Id>> StatelessTracker<A, Id, T> {
     /// the vectors will be extended. A call to set_size is not needed.
     pub fn add_single<'a>(&mut self, storage: &'a Storage<T, Id>, id: Id) -> Option<&'a Arc<T>> {
         let resource = storage.get(id).ok()?;
-        /*
-        let (index32, _epoch, _) = id.unzip();
-        let index = index32 as usize;
+        #[cfg(not(feature = "cursed"))]
+        {
+            let (index32, _epoch, _) = id.unzip();
+            let index = index32 as usize;
 
-        self.allow_index(index);
+            self.allow_index(index);
 
-        self.tracker_assert_in_bounds(index);
+            self.tracker_assert_in_bounds(index);
 
-        unsafe {
-            self.metadata.insert(index, resource.clone());
+            unsafe {
+                self.metadata.insert(index, resource.clone());
+            }
         }
-        */
         Some(resource)
     }
 
@@ -205,36 +228,42 @@ impl<A: HalApi, Id: TypedId, T: Resource<Id>> StatelessTracker<A, Id, T> {
     /// If the ID is higher than the length of internal vectors,
     /// the vectors will be extended. A call to set_size is not needed.
     pub fn add_from_tracker(&mut self, other: &Self) {
-        //let incoming_size = other.metadata.size();
-        //if incoming_size > self.metadata.size() {
-        //    self.set_size(incoming_size);
-        //}
-        //
-        //for index in other.metadata.owned_indices() {
-        //    self.tracker_assert_in_bounds(index);
-        //    other.tracker_assert_in_bounds(index);
-        //    unsafe {
-        //        let previously_owned = self.metadata.contains_unchecked(index);
-        //
-        //        if !previously_owned {
-        //            let other_resource = other.metadata.get_resource_unchecked(index);
-        //            self.metadata.insert(index, other_resource.clone());
-        //        }
-        //    }
-        //}
+        #[cfg(not(feature = "cursed"))]
+        {
+            let incoming_size = other.metadata.size();
+            if incoming_size > self.metadata.size() {
+                self.set_size(incoming_size);
+            }
+
+            for index in other.metadata.owned_indices() {
+                self.tracker_assert_in_bounds(index);
+                other.tracker_assert_in_bounds(index);
+                unsafe {
+                    let previously_owned = self.metadata.contains_unchecked(index);
+
+                    if !previously_owned {
+                        let other_resource = other.metadata.get_resource_unchecked(index);
+                        self.metadata.insert(index, other_resource.clone());
+                    }
+                }
+            }
+        }
     }
 
     pub fn get(&self, id: Id) -> Option<&Arc<T>> {
-        //let index = id.unzip().0 as usize;
-        //if index > self.metadata.size() {
-        //    return None;
-        //}
-        //self.tracker_assert_in_bounds(index);
-        //unsafe {
-        //    if self.metadata.contains_unchecked(index) {
-        //        return Some(self.metadata.get_resource_unchecked(index));
-        //    }
-        //}
+        #[cfg(not(feature = "cursed"))]
+        {
+            let index = id.unzip().0 as usize;
+            if index > self.metadata.size() {
+                return None;
+            }
+            self.tracker_assert_in_bounds(index);
+            unsafe {
+                if self.metadata.contains_unchecked(index) {
+                    return Some(self.metadata.get_resource_unchecked(index));
+                }
+            }
+        }
         None
     }
 }

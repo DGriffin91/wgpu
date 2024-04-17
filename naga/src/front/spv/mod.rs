@@ -692,7 +692,8 @@ impl<I: Iterator<Item = u32>> Frontend<I> {
     ) -> Result<(), Error> {
         let raw = self.next()?;
         let dec_typed = spirv::Decoration::from_u32(raw).ok_or(Error::InvalidDecoration(raw))?;
-        /* log::trace!("\t\t{}: {:?}", dec.debug_name(), dec_typed); */
+        #[cfg(not(feature = "cursed"))]
+        log::trace!("\t\t{}: {:?}", dec.debug_name(), dec_typed);
         match dec_typed {
             spirv::Decoration::BuiltIn => {
                 inst.expect(base_words + 2)?;
@@ -1488,7 +1489,8 @@ impl<I: Iterator<Item = u32>> Frontend<I> {
                     let result_type_id = self.next()?;
                     let result_id = self.next()?;
                     let base_id = self.next()?;
-                    /* log::trace!("\t\t\tlooking up expr {:?}", base_id); */
+                    #[cfg(not(feature = "cursed"))]
+                    log::trace!("\t\t\tlooking up expr {:?}", base_id);
 
                     let mut acex = {
                         let lexp = self.lookup_expression.lookup(base_id)?;
@@ -1523,7 +1525,8 @@ impl<I: Iterator<Item = u32>> Frontend<I> {
 
                     for _ in 4..inst.wc {
                         let access_id = self.next()?;
-                        /* log::trace!("\t\t\tlooking up index expr {:?}", access_id); */
+                        #[cfg(not(feature = "cursed"))]
+                        log::trace!("\t\t\tlooking up index expr {:?}", access_id);
                         let index_expr = self.lookup_expression.lookup(access_id)?.clone();
                         let index_expr_handle = get_expr_handle!(access_id, &index_expr);
                         let index_expr_data = &ctx.expressions[index_expr.handle];
@@ -1539,8 +1542,8 @@ impl<I: Iterator<Item = u32>> Frontend<I> {
                             ),
                             _ => None,
                         };
-
-                        /* log::trace!("\t\t\tlooking up type {:?}", acex.type_id); */
+                        #[cfg(not(feature = "cursed"))]
+                        log::trace!("\t\t\tlooking up type {:?}", acex.type_id);
                         let type_lookup = self.lookup_type.lookup(acex.type_id)?;
                         let ty = &ctx.type_arena[type_lookup.handle];
                         acex = match ty.inner {
@@ -1868,12 +1871,14 @@ impl<I: Iterator<Item = u32>> Frontend<I> {
                     let result_type_id = self.next()?;
                     let result_id = self.next()?;
                     let base_id = self.next()?;
-                    /* log::trace!("\t\t\tlooking up expr {:?}", base_id); */
+                    #[cfg(not(feature = "cursed"))]
+                    log::trace!("\t\t\tlooking up expr {:?}", base_id);
                     let mut lexp = self.lookup_expression.lookup(base_id)?.clone();
                     lexp.handle = get_expr_handle!(base_id, &lexp);
                     for _ in 4..inst.wc {
                         let index = self.next()?;
-                        /* log::trace!("\t\t\tlooking up type {:?}", lexp.type_id); */
+                        #[cfg(not(feature = "cursed"))]
+                        log::trace!("\t\t\tlooking up type {:?}", lexp.type_id);
                         let type_lookup = self.lookup_type.lookup(lexp.type_id)?;
                         let type_id = match ctx.type_arena[type_lookup.handle].inner {
                             crate::TypeInner::Struct { .. } => {
@@ -1957,7 +1962,8 @@ impl<I: Iterator<Item = u32>> Frontend<I> {
                     let mut components = Vec::with_capacity(inst.wc as usize - 2);
                     for _ in 3..inst.wc {
                         let comp_id = self.next()?;
-                        /* log::trace!("\t\t\tlooking up expr {:?}", comp_id); */
+                        #[cfg(not(feature = "cursed"))]
+                        log::trace!("\t\t\tlooking up expr {:?}", comp_id);
                         let lexp = self.lookup_expression.lookup(comp_id)?;
                         let handle = get_expr_handle!(comp_id, lexp);
                         components.push(handle);

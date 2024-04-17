@@ -108,12 +108,13 @@ impl<T: 'static> HandleMap<T> {
     /// If we thought `old` wouldn't be used in the compacted module, return
     /// `None`.
     pub fn try_adjust(&self, old: Handle<T>) -> Option<Handle<T>> {
-        /* log::trace!(
+        #[cfg(not(feature = "cursed"))]
+        log::trace!(
             "adjusting {} handle [{}] -> [{:?}]",
             std::any::type_name::<T>(),
             old.index() + 1,
             self.new_index[old.index()]
-        ); */
+        );
         // Note that `Handle::index` returns a zero-based index,
         // but `Handle::new` accepts a 1-based `Index`.
         self.new_index[old.index()].map(Handle::new)

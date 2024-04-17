@@ -24,7 +24,10 @@ targets = [
 [lib]
 
 [features]
-default = ["wgsl", "dx12", "metal", "webgpu"]
+# Cursed is default so only a cargo patch is needed, then features in bevy, etc.. don't need to also be setup
+default = ["wgsl", "dx12", "metal", "webgpu", "cursed"]
+
+cursed = ["wgc/cursed", "wgc?/cursed", "naga?/cursed", "hal/cursed"]
 
 #! ### Backends
 # --------------------------------------------------------------------
