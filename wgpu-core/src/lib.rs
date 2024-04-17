@@ -336,7 +336,7 @@ macro_rules! api_log {
 }
 #[cfg(not(feature = "api_log_info"))]
 macro_rules! api_log {
-    ($($arg:tt)+) => (log::trace!($($arg)+))
+    ($($arg:tt)+) => ( log::trace!($($arg)+))
 }
 pub(crate) use api_log;
 

@@ -749,12 +749,12 @@ impl<A: HalApi> LifetimeTracker<A> {
 
         for buffer in self.mapped.drain(..) {
             let submit_index = buffer.info.submission_index();
-            log::trace!(
+            /* log::trace!(
                 "Mapping of {:?} at submission {:?} gets assigned to active {:?}",
                 buffer.info.id(),
                 submit_index,
                 self.active.iter().position(|a| a.index == submit_index)
-            );
+            ); */
 
             self.active
                 .iter_mut()
@@ -789,7 +789,7 @@ impl<A: HalApi> LifetimeTracker<A> {
             };
             if is_removed {
                 *buffer.map_state.lock() = resource::BufferMapState::Idle;
-                log::trace!("Buffer ready to map {:?} is not tracked anymore", buffer_id);
+                /* log::trace!("Buffer ready to map {:?} is not tracked anymore", buffer_id); */
             } else {
                 let mapping = match std::mem::replace(
                     &mut *buffer.map_state.lock(),

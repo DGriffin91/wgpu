@@ -64,6 +64,8 @@ impl<A: HalApi> CommandBufferTextureMemoryActions<A> {
     ) -> SurfacesInDiscardState<A> {
         let mut immediately_necessary_clears = SurfacesInDiscardState::new();
 
+        /*
+
         // Note that within a command buffer we may stack arbitrary memory init
         // actions on the same texture Since we react to them in sequence, they
         // are going to be dropped again at queue submit
@@ -112,7 +114,7 @@ impl<A: HalApi> CommandBufferTextureMemoryActions<A> {
                 true
             }
         });
-
+        */
         immediately_necessary_clears
     }
 

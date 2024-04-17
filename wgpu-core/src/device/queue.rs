@@ -395,7 +395,7 @@ impl<G: GlobalIdentityHandlerFactory> Global<G> {
         }
 
         if data_size == 0 {
-            log::trace!("Ignoring write_buffer of size 0");
+            /* log::trace!("Ignoring write_buffer of size 0"); */
             return Ok(());
         }
 
@@ -659,7 +659,7 @@ impl<G: GlobalIdentityHandlerFactory> Global<G> {
         }
 
         if size.width == 0 || size.height == 0 || size.depth_or_array_layers == 0 {
-            log::trace!("Ignoring write_texture of size 0");
+            /* log::trace!("Ignoring write_texture of size 0"); */
             return Ok(());
         }
 
@@ -913,7 +913,7 @@ impl<G: GlobalIdentityHandlerFactory> Global<G> {
         let device = queue.device.as_ref().unwrap();
 
         if size.width == 0 || size.height == 0 || size.depth_or_array_layers == 0 {
-            log::trace!("Ignoring write_texture of size 0");
+            /* log::trace!("Ignoring write_texture of size 0"); */
             return Ok(());
         }
 
@@ -1177,10 +1177,11 @@ impl<G: GlobalIdentityHandlerFactory> Global<G> {
 
                         // optimize the tracked states
                         // cmdbuf.trackers.optimize();
+
                         {
                             let cmd_buf_data = cmdbuf.data.lock();
                             let cmd_buf_trackers = &cmd_buf_data.as_ref().unwrap().trackers;
-
+                            /*
                             // update submission IDs
                             for buffer in cmd_buf_trackers.buffers.used_resources() {
                                 let id = buffer.info.id();
@@ -1210,6 +1211,9 @@ impl<G: GlobalIdentityHandlerFactory> Global<G> {
                                     }
                                 }
                             }
+                            */
+                            // Leaving this out results in this error in bevy: (but bunnymark works fine without it)
+                            // ERROR present_frames: wgpu_core::present: No work has been submitted for this frame
                             for texture in cmd_buf_trackers.textures.used_resources() {
                                 let id = texture.info.id();
                                 let should_extend = match texture.inner.get(&snatch_guard) {
@@ -1238,6 +1242,7 @@ impl<G: GlobalIdentityHandlerFactory> Global<G> {
                                     };
                                 }
                             }
+                            /*
                             for texture_view in cmd_buf_trackers.views.used_resources() {
                                 texture_view.info.use_at(submit_index);
                                 if texture_view.is_unique() {
@@ -1323,7 +1328,9 @@ impl<G: GlobalIdentityHandlerFactory> Global<G> {
                                         .insert(bundle.as_info().id(), bundle.clone());
                                 }
                             }
+                            */
                         }
+
                         let mut baked = cmdbuf.from_arc_into_baked();
                         // execute resource transitions
                         unsafe {
@@ -1335,7 +1342,7 @@ impl<G: GlobalIdentityHandlerFactory> Global<G> {
                                 ))
                                 .map_err(DeviceError::from)?
                         };
-                        log::trace!("Stitching command buffer {:?} before submission", cmb_id);
+                        /* log::trace!("Stitching command buffer {:?} before submission", cmb_id); */
 
                         //Note: locking the trackers has to be done after the storages
                         let mut trackers = device.trackers.lock();
@@ -1394,7 +1401,7 @@ impl<G: GlobalIdentityHandlerFactory> Global<G> {
                         });
                     }
 
-                    log::trace!("Device after submission {}", submit_index);
+                    /* log::trace!("Device after submission {}", submit_index); */
                 }
             }
 

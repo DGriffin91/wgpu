@@ -75,7 +75,7 @@ impl FunctionMap {
         }
 
         for (_, local) in function.local_variables.iter_mut() {
-            log::trace!("adjusting local variable {:?}", local.name);
+            /* log::trace!("adjusting local variable {:?}", local.name); */
             module_map.types.adjust(&mut local.ty);
             if let Some(ref mut init) = local.init {
                 self.expressions.adjust(init);

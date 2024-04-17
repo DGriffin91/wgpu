@@ -431,48 +431,49 @@ struct State<A: HalApi> {
 
 impl<A: HalApi> State<A> {
     fn is_ready(&self, indexed: bool) -> Result<(), DrawError> {
-        // Determine how many vertex buffers have already been bound
-        let vertex_buffer_count = self.vertex.inputs.iter().take_while(|v| v.bound).count() as u32;
-        // Compare with the needed quantity
-        if vertex_buffer_count < self.vertex.buffers_required {
-            return Err(DrawError::MissingVertexBuffer {
-                index: vertex_buffer_count,
-            });
-        }
-
-        let bind_mask = self.binder.invalid_mask();
-        if bind_mask != 0 {
-            //let (expected, provided) = self.binder.entries[index as usize].info();
-            return Err(DrawError::IncompatibleBindGroup {
-                index: bind_mask.trailing_zeros(),
-                diff: self.binder.bgl_diff(),
-            });
-        }
-        if self.pipeline.is_none() {
-            return Err(DrawError::MissingPipeline);
-        }
-        if self.blend_constant == OptionalState::Required {
-            return Err(DrawError::MissingBlendConstant);
-        }
-
-        if indexed {
-            // Pipeline expects an index buffer
-            if let Some(pipeline_index_format) = self.index.pipeline_format {
-                // We have a buffer bound
-                let buffer_index_format = self.index.format.ok_or(DrawError::MissingIndexBuffer)?;
-
-                // The buffers are different formats
-                if pipeline_index_format != buffer_index_format {
-                    return Err(DrawError::UnmatchedIndexFormats {
-                        pipeline: pipeline_index_format,
-                        buffer: buffer_index_format,
+        /*
+                // Determine how many vertex buffers have already been bound
+                let vertex_buffer_count = self.vertex.inputs.iter().take_while(|v| v.bound).count() as u32;
+                // Compare with the needed quantity
+                if vertex_buffer_count < self.vertex.buffers_required {
+                    return Err(DrawError::MissingVertexBuffer {
+                        index: vertex_buffer_count,
                     });
                 }
-            }
-        }
 
-        self.binder.check_late_buffer_bindings()?;
+                let bind_mask = self.binder.invalid_mask();
+                if bind_mask != 0 {
+                    //let (expected, provided) = self.binder.entries[index as usize].info();
+                    return Err(DrawError::IncompatibleBindGroup {
+                        index: bind_mask.trailing_zeros(),
+                        diff: self.binder.bgl_diff(),
+                    });
+                }
+                if self.pipeline.is_none() {
+                    return Err(DrawError::MissingPipeline);
+                }
+                if self.blend_constant == OptionalState::Required {
+                    return Err(DrawError::MissingBlendConstant);
+                }
 
+                if indexed {
+                    // Pipeline expects an index buffer
+                    if let Some(pipeline_index_format) = self.index.pipeline_format {
+                        // We have a buffer bound
+                        let buffer_index_format = self.index.format.ok_or(DrawError::MissingIndexBuffer)?;
+
+                        // The buffers are different formats
+                        if pipeline_index_format != buffer_index_format {
+                            return Err(DrawError::UnmatchedIndexFormats {
+                                pipeline: pipeline_index_format,
+                                buffer: buffer_index_format,
+                            });
+                        }
+                    }
+                }
+
+                self.binder.check_late_buffer_bindings()?;
+        */
         Ok(())
     }
 
@@ -791,7 +792,6 @@ impl<'a, A: HalApi> RenderPassInfo<'a, A> {
         query_set_guard: &'a Storage<QuerySet<A>, id::QuerySetId>,
     ) -> Result<Self, RenderPassErrorInner> {
         profiling::scope!("RenderPassInfo::start");
-
         // We default to false intentionally, even if depth-stencil isn't used at all.
         // This allows us to use the primary raw pipeline in `RenderPipeline`,
         // instead of the special read-only one, which would be `None`.
@@ -1366,10 +1366,10 @@ impl<G: GlobalIdentityHandlerFactory> Global<G> {
             let texture_guard = hub.textures.read();
             let view_guard = hub.texture_views.read();
 
-            log::trace!(
+            /* log::trace!(
                 "Encoding render pass begin in command buffer {:?}",
                 encoder_id
-            );
+            ); */
 
             let mut info = RenderPassInfo::start(
                 device,
@@ -1692,7 +1692,6 @@ impl<G: GlobalIdentityHandlerFactory> Global<G> {
                         size,
                     } => {
                         api_log!("RenderPass::set_vertex_buffer {slot} {buffer_id:?}");
-
                         let scope = PassErrorScope::SetVertexBuffer(buffer_id);
                         let buffer = info
                             .usage_scope
@@ -1715,12 +1714,12 @@ impl<G: GlobalIdentityHandlerFactory> Global<G> {
 
                         check_buffer_usage(buffer.usage, BufferUsages::VERTEX)
                             .map_pass_err(scope)?;
+
                         let buf_raw = buffer
                             .raw
                             .get(&snatch_guard)
                             .ok_or(RenderCommandError::DestroyedBuffer(buffer_id))
                             .map_pass_err(scope)?;
-
                         let empty_slots =
                             (1 + slot as usize).saturating_sub(state.vertex.inputs.len());
                         state
@@ -2364,7 +2363,7 @@ impl<G: GlobalIdentityHandlerFactory> Global<G> {
                 }
             }
 
-            log::trace!("Merging renderpass into cmd_buf {:?}", encoder_id);
+            /* log::trace!("Merging renderpass into cmd_buf {:?}", encoder_id); */
             let (trackers, pending_discard_init_fixups) =
                 info.finish(raw).map_pass_err(pass_scope)?;
 

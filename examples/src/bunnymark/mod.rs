@@ -58,7 +58,7 @@ struct Example {
 
 impl Example {
     fn spawn_bunnies(&mut self) {
-        let spawn_count = 64;
+        let spawn_count = 125000;
         let color = self.rng.generate::<u32>();
         println!(
             "Spawning {} bunnies, total at {}",
@@ -67,8 +67,10 @@ impl Example {
         );
         for _ in 0..spawn_count {
             let speed = self.rng.generate::<f32>() * MAX_VELOCITY - (MAX_VELOCITY * 0.5);
+            let posx = self.rng.generate::<f32>();
+            let posy = self.rng.generate::<f32>();
             self.bunnies.push(Bunny {
-                position: [0.0, 0.5 * (self.extent[1] as f32)],
+                position: [posx, (self.extent[1] as f32) * posy],
                 velocity: [speed, 0.0],
                 color,
                 _pad: 0,

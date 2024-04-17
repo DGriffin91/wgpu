@@ -227,7 +227,7 @@ impl super::Adapter {
                     & glow::CONTEXT_CORE_PROFILE_BIT as i32
                     != 0
             });
-            log::trace!(
+            /* log::trace!(
                 "Profile: {}",
                 core_profile
                     .map(|core_profile| if core_profile {
@@ -236,7 +236,7 @@ impl super::Adapter {
                         "Compatibility"
                     })
                     .unwrap_or("Legacy")
-            );
+            ); */
         }
 
         if es_ver.is_none() && full_ver.is_none() {

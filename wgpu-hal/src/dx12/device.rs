@@ -1014,8 +1014,8 @@ impl crate::Device<super::Api> for super::Device {
             (None, None)
         };
 
-        log::trace!("{:#?}", parameters);
-        log::trace!("Bindings {:#?}", binding_map);
+        /* log::trace!("{:#?}", parameters); */
+        /* log::trace!("Bindings {:#?}", binding_map); */
 
         let (blob, error) = self
             .library
@@ -1593,16 +1593,16 @@ impl crate::Device<super::Api> for super::Device {
             let remaining_wait_duration = match timeout_duration.checked_sub(elapsed) {
                 Some(remaining) => remaining,
                 None => {
-                    log::trace!("Timeout elapsed inbetween waits!");
+                    /* log::trace!("Timeout elapsed inbetween waits!"); */
                     break Ok(false);
                 }
             };
 
-            log::trace!(
+            /* log::trace!(
                 "Waiting for fence value {} for {:?}",
                 value,
                 remaining_wait_duration
-            );
+            ); */
 
             match unsafe {
                 synchapi::WaitForSingleObject(
@@ -1616,7 +1616,7 @@ impl crate::Device<super::Api> for super::Device {
                     break Err(DeviceError::Lost);
                 }
                 winerror::WAIT_TIMEOUT => {
-                    log::trace!("Wait timed out!");
+                    /* log::trace!("Wait timed out!"); */
                     break Ok(false);
                 }
                 other => {
@@ -1626,7 +1626,7 @@ impl crate::Device<super::Api> for super::Device {
             };
 
             fence_value = unsafe { fence.raw.GetCompletedValue() };
-            log::trace!("Wait complete! Fence actual value: {}", fence_value);
+            /* log::trace!("Wait complete! Fence actual value: {}", fence_value); */
 
             if fence_value >= value {
                 break Ok(true);

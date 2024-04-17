@@ -54,13 +54,13 @@ impl CompilationContext<'_> {
                 Some(name) => name.clone(),
                 None => continue,
             };
-            log::trace!(
+            /* log::trace!(
                 "Rebind buffer: {:?} -> {}, register={:?}, slot={}",
                 var.name.as_ref(),
                 &name,
                 register,
                 slot
-            );
+            ); */
             self.name_binding_map.insert(name, (register, slot));
         }
 
@@ -414,11 +414,11 @@ impl super::Device {
             // in the shader. We can't remap storage buffers this way.
             unsafe { gl.use_program(Some(program)) };
             for (ref name, (register, slot)) in name_binding_map {
-                log::trace!("Get binding {:?} from program {:?}", name, program);
+                /* log::trace!("Get binding {:?} from program {:?}", name, program); */
                 match register {
                     super::BindingRegister::UniformBuffers => {
                         let index = unsafe { gl.get_uniform_block_index(program, name) }.unwrap();
-                        log::trace!("\tBinding slot {slot} to block index {index}");
+                        /* log::trace!("\tBinding slot {slot} to block index {index}"); */
                         unsafe { gl.uniform_block_binding(program, index, slot as _) };
                     }
                     super::BindingRegister::StorageBuffers => {
@@ -448,13 +448,13 @@ impl super::Device {
 
                 let location = unsafe { gl.get_uniform_location(program, &item.access_path) };
 
-                log::trace!(
+                /* log::trace!(
                     "push constant item: name={}, ty={:?}, offset={}, location={:?}",
                     item.access_path,
                     type_inner,
                     item.offset,
                     location,
-                );
+                ); */
 
                 if let Some(location) = location {
                     uniforms.push(super::PushConstantDesc {

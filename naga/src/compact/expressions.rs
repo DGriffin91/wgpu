@@ -41,14 +41,14 @@ impl<'tracer> ExpressionTracer<'tracer> {
     /// [fe]: crate::Function::expressions
     /// [ce]: crate::Module::const_expressions
     pub fn trace_expressions(&mut self) {
-        log::trace!(
+        /* log::trace!(
             "entering trace_expression of {}",
             if self.const_expressions_used.is_some() {
                 "function expressions"
             } else {
                 "const expressions"
             }
-        );
+        ); */
 
         // We don't need recursion or a work list. Because an
         // expression may only refer to other expressions that precede
@@ -61,7 +61,7 @@ impl<'tracer> ExpressionTracer<'tracer> {
                 continue;
             }
 
-            log::trace!("tracing new expression {:?}", expr);
+            /* log::trace!("tracing new expression {:?}", expr); */
 
             use crate::Expression as Ex;
             match *expr {

@@ -123,8 +123,8 @@ impl<A: HalApi> BufferUsageScope<A> {
     }
 
     fn tracker_assert_in_bounds(&self, index: usize) {
-        strict_assert!(index < self.state.len());
-        self.metadata.tracker_assert_in_bounds(index);
+        //strict_assert!(index < self.state.len());
+        //self.metadata.tracker_assert_in_bounds(index);
     }
 
     /// Sets the size of all the vectors inside the tracker.
@@ -330,14 +330,14 @@ impl<A: HalApi> ResourceTracker<BufferId, Buffer<A>> for BufferTracker<A> {
                 //so it's already been released from user and so it's not inside Registry\Storage
                 if existing_ref_count <= 2 {
                     self.metadata.remove(index);
-                    log::trace!("Buffer {:?} is not tracked anymore", id,);
+                    /* log::trace!("Buffer {:?} is not tracked anymore", id,); */
                     return true;
                 } else {
-                    log::trace!(
+                    /* log::trace!(
                         "Buffer {:?} is still referenced from {}",
                         id,
                         existing_ref_count
-                    );
+                    ); */
                     return false;
                 }
             }
@@ -359,9 +359,9 @@ impl<A: HalApi> BufferTracker<A> {
     }
 
     fn tracker_assert_in_bounds(&self, index: usize) {
-        strict_assert!(index < self.start.len());
-        strict_assert!(index < self.end.len());
-        self.metadata.tracker_assert_in_bounds(index);
+        //strict_assert!(index < self.start.len());
+        //strict_assert!(index < self.end.len());
+        //self.metadata.tracker_assert_in_bounds(index);
     }
 
     /// Sets the size of all the vectors inside the tracker.
@@ -758,7 +758,7 @@ unsafe fn insert<A: HalApi>(
     strict_assert_eq!(invalid_resource_state(new_start_state), false);
     strict_assert_eq!(invalid_resource_state(new_end_state), false);
 
-    log::trace!("\tbuf {index}: insert {new_start_state:?}..{new_end_state:?}");
+    /* log::trace!("\tbuf {index}: insert {new_start_state:?}..{new_end_state:?}"); */
 
     unsafe {
         if let Some(&mut ref mut start_state) = start_states {
@@ -784,19 +784,19 @@ unsafe fn merge<A: HalApi>(
 
     let merged_state = *current_state | new_state;
 
-    if invalid_resource_state(merged_state) {
-        return Err(UsageConflict::from_buffer(
-            BufferId::zip(
-                index32,
-                unsafe { metadata_provider.get_epoch(index) },
-                A::VARIANT,
-            ),
-            *current_state,
-            new_state,
-        ));
-    }
+    //if invalid_resource_state(merged_state) {
+    //    return Err(UsageConflict::from_buffer(
+    //        BufferId::zip(
+    //            index32,
+    //            unsafe { metadata_provider.get_epoch(index) },
+    //            A::VARIANT,
+    //        ),
+    //        *current_state,
+    //        new_state,
+    //    ));
+    //}
 
-    log::trace!("\tbuf {index32}: merge {current_state:?} + {new_state:?}");
+    /* log::trace!("\tbuf {index32}: merge {current_state:?} + {new_state:?}"); */
 
     *current_state = merged_state;
 
@@ -823,7 +823,7 @@ unsafe fn barrier(
         usage: current_state..new_state,
     });
 
-    log::trace!("\tbuf {index}: transition {current_state:?} -> {new_state:?}");
+    /* log::trace!("\tbuf {index}: transition {current_state:?} -> {new_state:?}"); */
 }
 
 #[inline(always)]

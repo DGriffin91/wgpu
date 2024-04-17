@@ -1384,7 +1384,7 @@ impl<W: Write> Writer<W> {
         }
 
         let expression = &context.function.expressions[expr_handle];
-        log::trace!("expression {:?} = {:?}", expr_handle, expression);
+        /* log::trace!("expression {:?} = {:?}", expr_handle, expression); */
         match *expression {
             crate::Expression::Literal(_)
             | crate::Expression::Constant(_)
@@ -2637,7 +2637,7 @@ impl<W: Write> Writer<W> {
             .insert(&level as *const _ as *const ());
 
         for statement in statements {
-            log::trace!("statement[{}] {:?}", level.0, statement);
+            /* log::trace!("statement[{}] {:?}", level.0, statement); */
             match *statement {
                 crate::Statement::Emit(ref range) => {
                     for handle in range.clone() {
@@ -3542,11 +3542,11 @@ impl<W: Write> Writer<W> {
     ) -> Result<TranslationInfo, Error> {
         let mut pass_through_globals = Vec::new();
         for (fun_handle, fun) in module.functions.iter() {
-            log::trace!(
+            /* log::trace!(
                 "function {:?}, handle {:?}",
                 fun.name.as_deref().unwrap_or("(anonymous)"),
                 fun_handle
-            );
+            ); */
 
             let fun_info = &mod_info[fun_handle];
             pass_through_globals.clear();
@@ -3685,11 +3685,11 @@ impl<W: Write> Writer<W> {
             let fun_info = mod_info.get_entry_point(ep_index);
             let mut ep_error = None;
 
-            log::trace!(
+            /* log::trace!(
                 "entry point {:?}, index {:?}",
                 fun.name.as_deref().unwrap_or("(anonymous)"),
                 ep_index
-            );
+            ); */
 
             // Is any global variable used by this entry point dynamically sized?
             let supports_array_length = module

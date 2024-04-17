@@ -98,7 +98,7 @@ impl Instance {
                     }
                 }
             } else {
-                log::trace!("Instance::new: backend {:?} not requested", A::VARIANT);
+                /* log::trace!("Instance::new: backend {:?} not requested", A::VARIANT); */
                 None
             }
         }

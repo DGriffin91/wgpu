@@ -350,7 +350,7 @@ impl<'a> ConstantEvaluator<'a> {
         expr: &Expression,
         span: Span,
     ) -> Result<Handle<Expression>, ConstantEvaluatorError> {
-        log::trace!("try_eval_and_append: {:?}", expr);
+        /* log::trace!("try_eval_and_append: {:?}", expr); */
         match *expr {
             Expression::Constant(c) if self.function_local_data.is_none() => {
                 // "See through" the constant and use its initializer.

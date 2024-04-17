@@ -470,18 +470,18 @@ impl Inner {
         };
 
         if log::max_level() >= log::LevelFilter::Trace {
-            log::trace!("Configurations:");
+            /* log::trace!("Configurations:"); */
             let config_count = egl.get_config_count(display).unwrap();
             let mut configurations = Vec::with_capacity(config_count);
             egl.get_configs(display, &mut configurations).unwrap();
             for &config in configurations.iter() {
-                log::trace!("\tCONFORMANT=0x{:X}, RENDERABLE=0x{:X}, NATIVE_RENDERABLE=0x{:X}, SURFACE_TYPE=0x{:X}, ALPHA_SIZE={}",
+                /* log::trace!("\tCONFORMANT=0x{:X}, RENDERABLE=0x{:X}, NATIVE_RENDERABLE=0x{:X}, SURFACE_TYPE=0x{:X}, ALPHA_SIZE={}",
                     egl.get_config_attrib(display, config, khronos_egl::CONFORMANT).unwrap(),
                     egl.get_config_attrib(display, config, khronos_egl::RENDERABLE_TYPE).unwrap(),
                     egl.get_config_attrib(display, config, khronos_egl::NATIVE_RENDERABLE).unwrap(),
                     egl.get_config_attrib(display, config, khronos_egl::SURFACE_TYPE).unwrap(),
                     egl.get_config_attrib(display, config, khronos_egl::ALPHA_SIZE).unwrap(),
-                );
+                ); */
             }
         }
 

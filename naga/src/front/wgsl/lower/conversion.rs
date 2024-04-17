@@ -406,7 +406,7 @@ impl crate::TypeInner {
             _ => return None,
         }
 
-        log::trace!("      okay: expr {expr_scalar:?}, goal {goal_scalar:?}");
+        /* log::trace!("      okay: expr {expr_scalar:?}, goal {goal_scalar:?}"); */
         Some((expr_scalar, goal_scalar))
     }
 

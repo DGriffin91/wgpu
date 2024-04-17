@@ -273,10 +273,10 @@ impl<A: HalApi> CommandBuffer<A> {
     }
 
     pub(crate) fn extract_baked_commands(&mut self) -> BakedCommands<A> {
-        log::trace!(
+        /* log::trace!(
             "Extracting BakedCommands from CommandBuffer {:?}",
             self.info.label()
-        );
+        ); */
         let data = self.data.lock().take().unwrap();
         BakedCommands {
             encoder: data.encoder.raw,
@@ -437,7 +437,7 @@ impl<G: GlobalIdentityHandlerFactory> Global<G> {
                             cmd_buf_data.status = CommandEncoderStatus::Finished;
                             //Note: if we want to stop tracking the swapchain texture view,
                             // this is the place to do it.
-                            log::trace!("Command buffer {:?}", encoder_id);
+                            /* log::trace!("Command buffer {:?}", encoder_id); */
                             None
                         }
                     }

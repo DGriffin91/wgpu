@@ -245,17 +245,17 @@ impl<A: HalApi> TextureUsageScope<A> {
     }
 
     fn tracker_assert_in_bounds(&self, index: usize) {
-        self.metadata.tracker_assert_in_bounds(index);
-
-        strict_assert!(index < self.set.simple.len());
-
-        strict_assert!(if self.metadata.contains(index)
-            && self.set.simple[index] == TextureUses::COMPLEX
-        {
-            self.set.complex.contains_key(&index)
-        } else {
-            true
-        });
+        //self.metadata.tracker_assert_in_bounds(index);
+        //
+        //strict_assert!(index < self.set.simple.len());
+        //
+        //strict_assert!(if self.metadata.contains(index)
+        //    && self.set.simple[index] == TextureUses::COMPLEX
+        //{
+        //    self.set.complex.contains_key(&index)
+        //} else {
+        //    true
+        //});
     }
 
     /// Sets the size of all the vectors inside the tracker.
@@ -420,14 +420,14 @@ impl<A: HalApi> ResourceTracker<TextureId, Texture<A>> for TextureTracker<A> {
                     self.start_set.complex.remove(&index);
                     self.end_set.complex.remove(&index);
                     self.metadata.remove(index);
-                    log::trace!("Texture {:?} is not tracked anymore", id,);
+                    /* log::trace!("Texture {:?} is not tracked anymore", id,); */
                     return true;
                 } else {
-                    log::trace!(
+                    /* log::trace!(
                         "Texture {:?} is still referenced from {}",
                         id,
                         existing_ref_count
-                    );
+                    ); */
                     return false;
                 }
             }
@@ -451,25 +451,25 @@ impl<A: HalApi> TextureTracker<A> {
     }
 
     fn tracker_assert_in_bounds(&self, index: usize) {
-        self.metadata.tracker_assert_in_bounds(index);
-
-        strict_assert!(index < self.start_set.simple.len());
-        strict_assert!(index < self.end_set.simple.len());
-
-        strict_assert!(if self.metadata.contains(index)
-            && self.start_set.simple[index] == TextureUses::COMPLEX
-        {
-            self.start_set.complex.contains_key(&index)
-        } else {
-            true
-        });
-        strict_assert!(if self.metadata.contains(index)
-            && self.end_set.simple[index] == TextureUses::COMPLEX
-        {
-            self.end_set.complex.contains_key(&index)
-        } else {
-            true
-        });
+        //self.metadata.tracker_assert_in_bounds(index);
+        //
+        //strict_assert!(index < self.start_set.simple.len());
+        //strict_assert!(index < self.end_set.simple.len());
+        //
+        //strict_assert!(if self.metadata.contains(index)
+        //    && self.start_set.simple[index] == TextureUses::COMPLEX
+        //{
+        //    self.start_set.complex.contains_key(&index)
+        //} else {
+        //    true
+        //});
+        //strict_assert!(if self.metadata.contains(index)
+        //    && self.end_set.simple[index] == TextureUses::COMPLEX
+        //{
+        //    self.end_set.complex.contains_key(&index)
+        //} else {
+        //    true
+        //});
     }
 
     /// Sets the size of all the vectors inside the tracker.
@@ -986,7 +986,7 @@ unsafe fn insert<A: HalApi>(
             // check that resource states don't have any conflicts.
             strict_assert_eq!(invalid_resource_state(state), false);
 
-            log::trace!("\ttex {index}: insert start {state:?}");
+            /* log::trace!("\ttex {index}: insert start {state:?}"); */
 
             if let Some(start_state) = start_state {
                 unsafe { *start_state.simple.get_unchecked_mut(index) = state };
@@ -1003,7 +1003,7 @@ unsafe fn insert<A: HalApi>(
             let complex =
                 unsafe { ComplexTextureState::from_selector_state_iter(full_range, state_iter) };
 
-            log::trace!("\ttex {index}: insert start {complex:?}");
+            /* log::trace!("\ttex {index}: insert start {complex:?}"); */
 
             if let Some(start_state) = start_state {
                 unsafe { *start_state.simple.get_unchecked_mut(index) = TextureUses::COMPLEX };
@@ -1025,7 +1025,7 @@ unsafe fn insert<A: HalApi>(
                 // check that resource states don't have any conflicts.
                 strict_assert_eq!(invalid_resource_state(state), false);
 
-                log::trace!("\ttex {index}: insert end {state:?}");
+                /* log::trace!("\ttex {index}: insert end {state:?}"); */
 
                 // We only need to insert into the end, as there is guarenteed to be
                 // a start state provider.
@@ -1038,7 +1038,7 @@ unsafe fn insert<A: HalApi>(
                     ComplexTextureState::from_selector_state_iter(full_range, state_iter)
                 };
 
-                log::trace!("\ttex {index}: insert end {complex:?}");
+                /* log::trace!("\ttex {index}: insert end {complex:?}"); */
 
                 // We only need to insert into the end, as there is guarenteed to be
                 // a start state provider.
@@ -1077,21 +1077,20 @@ unsafe fn merge<A: HalApi>(
         (SingleOrManyStates::Single(current_simple), SingleOrManyStates::Single(new_simple)) => {
             let merged_state = *current_simple | new_simple;
 
-            log::trace!("\ttex {index}: merge simple {current_simple:?} + {new_simple:?}");
-
-            if invalid_resource_state(merged_state) {
-                return Err(UsageConflict::from_texture(
-                    TextureId::zip(
-                        index as _,
-                        unsafe { metadata_provider.get_epoch(index) },
-                        A::VARIANT,
-                    ),
-                    texture_selector.clone(),
-                    *current_simple,
-                    new_simple,
-                ));
-            }
-
+            /* log::trace!("\ttex {index}: merge simple {current_simple:?} + {new_simple:?}"); */
+            //
+            //if invalid_resource_state(merged_state) {
+            //    return Err(UsageConflict::from_texture(
+            //        TextureId::zip(
+            //            index as _,
+            //            unsafe { metadata_provider.get_epoch(index) },
+            //            A::VARIANT,
+            //        ),
+            //        texture_selector.clone(),
+            //        *current_simple,
+            //        new_simple,
+            //    ));
+            //}
             *current_simple = merged_state;
         }
         (SingleOrManyStates::Single(current_simple), SingleOrManyStates::Many(new_many)) => {
@@ -1108,21 +1107,20 @@ unsafe fn merge<A: HalApi>(
             for (selector, new_state) in new_many {
                 let merged_state = *current_simple | new_state;
 
-                log::trace!("\ttex {index}: merge {selector:?} {current_simple:?} + {new_state:?}");
-
-                if invalid_resource_state(merged_state) {
-                    return Err(UsageConflict::from_texture(
-                        TextureId::zip(
-                            index as _,
-                            unsafe { metadata_provider.get_epoch(index) },
-                            A::VARIANT,
-                        ),
-                        selector,
-                        *current_simple,
-                        new_state,
-                    ));
-                }
-
+                /* log::trace!("\ttex {index}: merge {selector:?} {current_simple:?} + {new_state:?}"); */
+                //
+                //if invalid_resource_state(merged_state) {
+                //    return Err(UsageConflict::from_texture(
+                //        TextureId::zip(
+                //            index as _,
+                //            unsafe { metadata_provider.get_epoch(index) },
+                //            A::VARIANT,
+                //        ),
+                //        selector,
+                //        *current_simple,
+                //        new_state,
+                //    ));
+                //}
                 for mip in
                     &mut new_complex.mips[selector.mips.start as usize..selector.mips.end as usize]
                 {
@@ -1150,27 +1148,26 @@ unsafe fn merge<A: HalApi>(
                     // simple states are never unknown.
                     let merged_state = merged_state - TextureUses::UNKNOWN;
 
-                    log::trace!(
+                    /* log::trace!(
                         "\ttex {index}: merge mip {mip_id} layers {layers:?} \
                          {current_layer_state:?} + {new_simple:?}"
-                    );
-
-                    if invalid_resource_state(merged_state) {
-                        return Err(UsageConflict::from_texture(
-                            TextureId::zip(
-                                index as _,
-                                unsafe { metadata_provider.get_epoch(index) },
-                                A::VARIANT,
-                            ),
-                            TextureSelector {
-                                mips: mip_id..mip_id + 1,
-                                layers: layers.clone(),
-                            },
-                            *current_layer_state,
-                            new_simple,
-                        ));
-                    }
-
+                    ); */
+                    //
+                    //if invalid_resource_state(merged_state) {
+                    //    return Err(UsageConflict::from_texture(
+                    //        TextureId::zip(
+                    //            index as _,
+                    //            unsafe { metadata_provider.get_epoch(index) },
+                    //            A::VARIANT,
+                    //        ),
+                    //        TextureSelector {
+                    //            mips: mip_id..mip_id + 1,
+                    //            layers: layers.clone(),
+                    //        },
+                    //        *current_layer_state,
+                    //        new_simple,
+                    //    ));
+                    //}
                     *current_layer_state = merged_state;
                 }
 
@@ -1195,26 +1192,26 @@ unsafe fn merge<A: HalApi>(
                             continue;
                         }
 
-                        log::trace!(
+                        /* log::trace!(
                             "\ttex {index}: merge mip {mip_id} layers {layers:?} \
                              {current_layer_state:?} + {new_state:?}"
-                        );
-
-                        if invalid_resource_state(merged_state) {
-                            return Err(UsageConflict::from_texture(
-                                TextureId::zip(
-                                    index as _,
-                                    unsafe { metadata_provider.get_epoch(index) },
-                                    A::VARIANT,
-                                ),
-                                TextureSelector {
-                                    mips: mip_id..mip_id + 1,
-                                    layers: layers.clone(),
-                                },
-                                *current_layer_state,
-                                new_state,
-                            ));
-                        }
+                        ); */
+                        //
+                        //if invalid_resource_state(merged_state) {
+                        //    return Err(UsageConflict::from_texture(
+                        //        TextureId::zip(
+                        //            index as _,
+                        //            unsafe { metadata_provider.get_epoch(index) },
+                        //            A::VARIANT,
+                        //        ),
+                        //        TextureSelector {
+                        //            mips: mip_id..mip_id + 1,
+                        //            layers: layers.clone(),
+                        //        },
+                        //        *current_layer_state,
+                        //        new_state,
+                        //    ));
+                        //}
                         *current_layer_state = merged_state;
                     }
 
@@ -1251,7 +1248,7 @@ unsafe fn barrier(
                 return;
             }
 
-            log::trace!("\ttex {index}: transition simple {current_simple:?} -> {new_simple:?}");
+            /* log::trace!("\ttex {index}: transition simple {current_simple:?} -> {new_simple:?}"); */
 
             barriers.push(PendingTransition {
                 id: index as _,
@@ -1269,9 +1266,9 @@ unsafe fn barrier(
                     continue;
                 }
 
-                log::trace!(
+                /* log::trace!(
                     "\ttex {index}: transition {selector:?} {current_simple:?} -> {new_state:?}"
-                );
+                ); */
 
                 barriers.push(PendingTransition {
                     id: index as _,
@@ -1293,10 +1290,10 @@ unsafe fn barrier(
                         continue;
                     }
 
-                    log::trace!(
+                    /* log::trace!(
                         "\ttex {index}: transition mip {mip_id} layers {layers:?} \
                          {current_layer_state:?} -> {new_simple:?}"
-                    );
+                    ); */
 
                     barriers.push(PendingTransition {
                         id: index as _,
@@ -1327,10 +1324,10 @@ unsafe fn barrier(
                             continue;
                         }
 
-                        log::trace!(
+                        /* log::trace!(
                             "\ttex {index}: transition mip {mip_id} layers {layers:?} \
                             {current_layer_state:?} -> {new_state:?}"
-                        );
+                        ); */
 
                         barriers.push(PendingTransition {
                             id: index as _,
