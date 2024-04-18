@@ -376,6 +376,10 @@ impl<C: Clone> BasePass<C> {
     fn new(label: &Label) -> Self {
         Self {
             label: label.as_ref().map(|cow| cow.to_string()),
+            #[cfg(not(feature = "not_cursed"))] 
+            // If there's a bunch of draw calls, a decent amount of time is spent reallocating commands
+            commands: Vec::with_capacity(100000),
+            #[cfg(feature = "not_cursed")]
             commands: Vec::new(),
             dynamic_offsets: Vec::new(),
             string_data: Vec::new(),
